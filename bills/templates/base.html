@@ -33,11 +33,10 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="flex h-16 items-center justify-between">
                 <a href="{% url 'home' %}" class="flex items-center gap-3">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-sm font-bold text-white shadow-soft">F</div>
+                    <!-- <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-sm font-bold text-white shadow-soft">💵</div> -->
                     <div>
                         <p class="text-lg font-semibold leading-none text-primary">FacTrack</p>
-                        <p class="text-xs text-textSecondary">Utility bill tracker</p>
-                    </div>
+                     </div>
                 </a>
 
                 <button id="mobile-menu-button" type="button" class="inline-flex items-center justify-center rounded-lg p-2 text-textSecondary hover:bg-slate-100 hover:text-primary lg:hidden" aria-controls="mobile-menu" aria-expanded="false">
@@ -82,7 +81,7 @@
 
     <footer class="border-t border-slate-200 bg-white">
         <div class="mx-auto max-w-7xl px-4 py-4 text-center text-sm text-textSecondary sm:px-6 lg:px-8">
-            FacTrack • Utility bill tracker for families in Burkina Faso
+            FacTrack &copy; {{ now|date:"Y" }}. Tous droits réservés à Adrien ♥️
         </div>
     </footer>
 
