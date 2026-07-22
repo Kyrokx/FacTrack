@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des factures</title>
+</head>
+<body>
+    <h1>Liste des factures</h1>
+    <a href="{% url 'add_bills' %}">Ajouter une facture</a>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Période</th>
+                <th>Date limite</th>
+                <th>Prix total</th>
+                <th>Ancien index</th>
+                <th>Nouveau index</th>
+                <th>Consommation</th>
+                <th>Statut</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for bill in bills %}
+            <tr>
+                <td>{{ bill.type }}</td>
+                <td>{{ bill.period|date:"m/Y" }}</td>
+                <td>{{ bill.deadline|date:"d/m/Y" }}</td>
+                <td>{{ bill.price_total }} FCFA</td>
+                <td>{{ bill.previous_index }}</td>
+                <td>{{ bill.new_index }}</td>
+                <td>{{ bill.total_consumption }}</td>
+                <td>{% if bill.paid %}Payée{% else %}Impayée{% endif %}</td>
+                <td>
+                    <form method="post" action="{% url 'toggle_bill' bill.id %}">
+                        {% csrf_token %}
+                        {% if bill.paid %}
+                            <button type="submit">Marquer comme impayée</button>
+                        {% else %}
+                            <button type="submit">Marquer comme payée</button>
+                        {% endif %}
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9">Aucune facture enregistrée.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{% url 'home' %}">Home</a>
+</body>
+</html>

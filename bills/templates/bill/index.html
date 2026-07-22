@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>SALUT</h1>
+    <!-- ✅ Fonctionne -->
+<form method="post" action="{% url 'logout' %}">
+    {% csrf_token %}
+    <button type="submit">Déconnexion</button>
+</form>
+
+{% if user.is_authenticated %}
+    <p>Bienvenue, {{ user.username }} !</p>
+{% else %}
+    <p>Vous n'êtes pas connecté.</p>
+{% endif %}
+
+
+<div>
+  <canvas id="myChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  const ctx = document.getElementById('myChart');
+
+  const periods = {{ periods|safe }};
+  const consumptions = {{ consumptions|safe }};
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: periods,
+      datasets: [{
+        label: 'Consommation SONABEL (kWh)',
+        data: consumptions,
+        borderColor: 'rgb(75, 192, 192)',
+        borderWidth: 2,
+        tension: 0.3,
+        fill: false
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        },
+        
+      }
+    }
+  });
+</script>
+ 
+ 
+
+{% for bill in bills%}
+    <p>Facture {{ bill.type }} du {{ bill.period }}</p>
+{% endfor %}
+
+<p>Prix total des factures {{ all_bills_price }} FCFA</p>
+
+
+<p>Il y a {{ unpaid_bills|length }} factures impaiyer pour un total de {{ unpaid_bills_price }} FCFA</p>
+
+<a href="{% url 'add_bills' %}">Ajouter une facture</a>
+<a href="{% url 'bills_list' %}">Voir les factures </a>
+
+</body>
+</html>
