@@ -3,19 +3,130 @@
 {% block title %}Ajouter une facture - FacTrack{% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-2xl rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-    <h1 class="text-3xl font-semibold text-slate-900">Ajouter une facture</h1>
-    <p class="mt-2 text-slate-600">Renseignez les details de la facture ci-dessous.</p>
+<div class="mx-auto max-w-2xl rounded-3xl bg-white p-5 shadow-soft ring-1 ring-slate-200 sm:p-6 lg:p-8">
+    <div class="mb-6">
+        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-secondary">Nouvelle facture</p>
+        <h1 class="mt-2 text-3xl font-bold tracking-tight text-primary">Ajouter une facture</h1>
+        <p class="mt-2 text-sm text-textSecondary">Complétez les informations ci-dessous pour enregistrer une nouvelle facture.</p>
+    </div>
 
-    <form method="post" action="{% url 'add_bills' %}" class="mt-6 space-y-5">
+    <form method="post" action="{% url 'add_bills' %}" class="space-y-6">
         {% csrf_token %}
-        <div class="space-y-4">
-            {{ form.as_p }}
+
+        <div class="grid gap-5 sm:grid-cols-2">
+            <div class="sm:col-span-2">
+                <label for="id_type" class="mb-2 block text-sm font-semibold text-primary">Type</label>
+                {{ form.type }}
+                {% if form.type.errors %}
+                    <p class="mt-2 text-sm text-danger">{{ form.type.errors|striptags }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="id_period" class="mb-2 block text-sm font-semibold text-primary">Période</label>
+                {{ form.period }}
+                {% if form.period.errors %}
+                    <p class="mt-2 text-sm text-danger">{{ form.period.errors|striptags }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="id_deadline" class="mb-2 block text-sm font-semibold text-primary">Date limite</label>
+                {{ form.deadline }}
+                {% if form.deadline.errors %}
+                    <p class="mt-2 text-sm text-danger">{{ form.deadline.errors|striptags }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="id_price_total" class="mb-2 block text-sm font-semibold text-primary">Prix total</label>
+                {{ form.price_total }}
+                {% if form.price_total.errors %}
+                    <p class="mt-2 text-sm text-danger">{{ form.price_total.errors|striptags }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="id_total_consumption" class="mb-2 block text-sm font-semibold text-primary">Consommation totale</label>
+                {{ form.total_consumption }}
+                {% if form.total_consumption.errors %}
+                    <p class="mt-2 text-sm text-danger">{{ form.total_consumption.errors|striptags }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="id_previous_index" class="mb-2 block text-sm font-semibold text-primary">Ancien index</label>
+                {{ form.previous_index }}
+                {% if form.previous_index.errors %}
+                    <p class="mt-2 text-sm text-danger">{{ form.previous_index.errors|striptags }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="id_new_index" class="mb-2 block text-sm font-semibold text-primary">Nouveau index</label>
+                {{ form.new_index }}
+                {% if form.new_index.errors %}
+                    <p class="mt-2 text-sm text-danger">{{ form.new_index.errors|striptags }}</p>
+                {% endif %}
+            </div>
+
+            <div class="sm:col-span-2 flex items-center gap-3 rounded-2xl bg-slate-50 p-4">
+                {{ form.paid }}
+                <label for="id_paid" class="text-sm font-semibold text-primary">Facture déjà payée</label>
+                {% if form.paid.errors %}
+                    <p class="mt-2 text-sm text-danger">{{ form.paid.errors|striptags }}</p>
+                {% endif %}
+            </div>
         </div>
 
-        <button type="submit" class="rounded-full bg-slate-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-slate-700">
-            Ajouter
-        </button>
+        {% if form.non_field_errors %}
+            <div class="rounded-2xl border border-danger/20 bg-danger/5 p-4 text-sm text-danger">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+            <a href="{% url 'bills_list' %}" class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-primary transition hover:border-primary hover:text-primary">Annuler</a>
+            <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:bg-secondary hover:shadow-soft">Enregistrer</button>
+        </div>
     </form>
 </div>
+
+<style>
+    #id_type,
+    #id_period,
+    #id_deadline,
+    #id_price_total,
+    #id_total_consumption,
+    #id_previous_index,
+    #id_new_index {
+        width: 100%;
+        border-radius: 0.75rem;
+        border: 1px solid #CBD5E0;
+        background: #FFFFFF;
+        padding: 0.75rem 1rem;
+        color: #1A202C;
+        transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+    }
+
+    #id_type:focus,
+    #id_period:focus,
+    #id_deadline:focus,
+    #id_price_total:focus,
+    #id_total_consumption:focus,
+    #id_previous_index:focus,
+    #id_new_index:focus {
+        outline: none;
+        border-color: #2E86AB;
+        box-shadow: 0 0 0 4px rgba(46, 134, 171, 0.15);
+    }
+
+    #id_paid {
+        width: 1rem;
+        height: 1rem;
+        border-radius: 0.25rem;
+        border: 1px solid #CBD5E0;
+        color: #1E3A5F;
+    }
+</style>
 {% endblock %}

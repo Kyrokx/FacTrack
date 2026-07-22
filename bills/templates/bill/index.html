@@ -8,95 +8,234 @@
 
 {% block content %}
 <div class="space-y-8">
-    <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-                <p class="text-sm font-medium uppercase tracking-wide text-slate-500">Tableau de bord</p>
-                <h1 class="mt-1 text-3xl font-semibold text-slate-900">Suivi des factures</h1>
-                {% if user.is_authenticated %}
-                    <p class="mt-2 text-slate-600">Bienvenue, {{ user.username }}.</p>
-                {% else %}
-                    <p class="mt-2 text-slate-600">Vous n'etes pas connecte.</p>
-                {% endif %}
+    <section class="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-slate-200 sm:p-6 lg:p-8">
+        <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div class="max-w-2xl space-y-2">
+                <p class="text-sm font-semibold uppercase tracking-[0.2em] text-secondary">Tableau de bord</p>
+                <h1 class="text-3xl font-bold tracking-tight text-primary sm:text-4xl">Suivi des factures du foyer</h1>
+                <p class="text-sm leading-6 text-textSecondary sm:text-base">Vue d’ensemble des montants, impayés et consommations SONABEL dans une interface claire et adaptée à tous les écrans.</p>
             </div>
-            <div class="flex gap-3">
-                <a href="{% url 'add_bills' %}" class="rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700">Ajouter une facture</a>
-                <a href="{% url 'bills_list' %}" class="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Voir les factures</a>
+            <div class="flex flex-col gap-3 sm:flex-row">
+                <a href="{% url 'add_bills' %}" class="inline-flex items-center justify-center rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:shadow-soft">Ajouter une facture</a>
+                <a href="{% url 'bills_list' %}" class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-primary transition duration-200 hover:-translate-y-0.5 hover:border-primary hover:text-primary">Voir les factures</a>
             </div>
         </div>
     </section>
 
-    <section class="grid gap-4 md:grid-cols-3">
-        <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-            <p class="text-sm text-slate-500">Total factures</p>
-            <p class="mt-2 text-3xl font-semibold">{{ all_bills_price }} FCFA</p>
-        </div>
-        <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-            <p class="text-sm text-slate-500">Factures impayees</p>
-            <p class="mt-2 text-3xl font-semibold">{{ unpaid_bills|length }}</p>
-        </div>
-        <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-            <p class="text-sm text-slate-500">Montant impaye</p>
-            <p class="mt-2 text-3xl font-semibold">{{ unpaid_bills_price }} FCFA</p>
-        </div>
+    <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <article class="rounded-3xl bg-white p-6 shadow-soft ring-1 ring-slate-200">
+            <p class="text-sm font-medium text-textSecondary">Total des factures</p>
+            <p class="mt-3 text-3xl font-bold text-primary">{{ all_bills_price }} FCFA</p>
+            <p class="mt-2 text-sm text-textSecondary">Montant cumulé toutes factures confondues.</p>
+        </article>
+        <article class="rounded-3xl bg-white p-6 shadow-soft ring-1 ring-slate-200">
+            <p class="text-sm font-medium text-textSecondary">Factures impayées</p>
+            <p class="mt-3 text-3xl font-bold text-danger">{{ unpaid_bills|length }}</p>
+            <p class="mt-2 text-sm text-textSecondary">Nombre de factures encore en attente de règlement.</p>
+        </article>
+        <article class="rounded-3xl bg-white p-6 shadow-soft ring-1 ring-slate-200 sm:col-span-2 xl:col-span-1">
+            <p class="text-sm font-medium text-textSecondary">Montant impayé</p>
+            <p class="mt-3 text-3xl font-bold text-accent">{{ unpaid_bills_price }} FCFA</p>
+            <p class="mt-2 text-sm text-textSecondary">Somme totale des factures non réglées.</p>
+        </article>
     </section>
 
-    <section class="grid gap-6 lg:grid-cols-2">
-        <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-            <h2 class="text-lg font-semibold text-slate-900">Consommation SONABEL</h2>
-            <div class="mt-4">
-                <canvas id="myChart" height="140"></canvas>
+    <section class="grid gap-6 xl:grid-cols-2">
+        <article class="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-slate-200 sm:p-6">
+            <div class="flex items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-primary">Consommation SONABEL</h2>
+                    <p class="text-sm text-textSecondary">Evolution mensuelle de la consommation.</p>
+                </div>
             </div>
-        </div>
+            <div class="mt-5 h-80 w-full">
+                <canvas id="sonabel_chart" class="h-full w-full"></canvas>
+            </div>
+        </article>
 
-        <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-            <h2 class="text-lg font-semibold text-slate-900">Dernieres factures</h2>
-            <div class="mt-4 space-y-3">
-                {% for bill in bills %}
-                    <div class="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3">
-                        <div>
-                            <p class="font-medium">{{ bill.type }}</p>
-                            <p class="text-sm text-slate-500">Facture du {{ bill.period|date:"m/Y" }}</p>
-                        </div>
-                        <p class="text-sm font-semibold {% if bill.paid %}text-emerald-600{% else %}text-amber-600{% endif %}">
-                            {% if bill.paid %}Payee{% else %}Impayee{% endif %}
-                        </p>
+        <article class="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-slate-200 sm:p-6">
+            <div class="flex items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-primary">Consommation ONEA</h2>
+                    <p class="text-sm text-textSecondary">Evolution mensuelle de la consommation.</p>
+                </div>
+            </div>
+            <div class="mt-5 h-80 w-full">
+                <canvas id="onea_chart" class="h-full w-full"></canvas>
+            </div>
+        </article>
+
+        <article class="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-slate-200 sm:p-6">
+            <div class="flex items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-primary">Dernières factures SONABEL</h2>
+                    <p class="text-sm text-textSecondary">Aperçu des factures récentes.</p>
+                </div>
+                <a href="{% url 'bills_list' %}" class="text-sm font-semibold text-secondary transition hover:text-primary">Tout voir</a>
+            </div>
+            <div class="mt-5 space-y-3">
+                {% for bill in sonabel_bills_descending %}
+                <div class="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p class="font-semibold text-primary">{{ bill.type }}</p>
+                        <p class="text-sm text-textSecondary">Période : {{ bill.period|date:"m/Y" }}</p>
                     </div>
+                    <div class="flex items-center gap-3">
+                        <span class="rounded-full px-3 py-1 text-xs font-semibold {% if bill.paid %}bg-success/10 text-success{% else %}bg-danger/10 text-danger{% endif %}">
+                            {% if bill.paid %}Payée{% else %}Impayée{% endif %}
+                        </span>
+                        <span class="text-sm font-semibold text-primary">{{ bill.price_total }} FCFA</span>
+                    </div>
+                </div>
                 {% empty %}
-                    <p class="text-slate-500">Aucune facture disponible.</p>
+                <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-textSecondary">
+                    Aucune facture enregistrée pour le moment.
+                </div>
                 {% endfor %}
             </div>
-        </div>
+        </article>
+
+        <article class="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-slate-200 sm:p-6">
+            <div class="flex items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-primary">Dernières factures ONEA</h2>
+                    <p class="text-sm text-textSecondary">Aperçu des factures récentes.</p>
+                </div>
+                <a href="{% url 'bills_list' %}" class="text-sm font-semibold text-secondary transition hover:text-primary">Tout voir</a>
+            </div>
+            <div class="mt-5 space-y-3">
+                {% for bill in onea_bills_descending %}
+                <div class="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p class="font-semibold text-primary">{{ bill.type }}</p>
+                        <p class="text-sm text-textSecondary">Période : {{ bill.period|date:"m/Y" }}</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="rounded-full px-3 py-1 text-xs font-semibold {% if bill.paid %}bg-success/10 text-success{% else %}bg-danger/10 text-danger{% endif %}">
+                            {% if bill.paid %}Payée{% else %}Impayée{% endif %}
+                        </span>
+                        <span class="text-sm font-semibold text-primary">{{ bill.price_total }} FCFA</span>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-textSecondary">
+                    Aucune facture enregistrée pour le moment.
+                </div>
+                {% endfor %}
+            </div>
+        </article>
     </section>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-  const ctx = document.getElementById('myChart');
-  const periods = {{ periods|safe }};
-  const consumptions = {{ consumptions|safe }};
+    const ctx_1 = document.getElementById('sonabel_chart');
+    const periods_1 = {{ periods_1|safe }};
+    const consumptions_1 = {{ consumptions_1|safe }};
 
-  new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: periods,
-      datasets: [{
-        label: 'Consommation SONABEL (kWh)',
-        data: consumptions,
-        borderColor: 'rgb(15, 23, 42)',
-        backgroundColor: 'rgba(15, 23, 42, 0.08)',
-        borderWidth: 2,
-        tension: 0.3,
-        fill: true
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        y: { beginAtZero: true }
-      }
+    if (ctx_1) {
+        new Chart(ctx_1, {
+            type: 'line',
+            data: {
+                labels: periods_1,
+                datasets: [{
+                    label: 'Consommation SONABEL (kWh)',
+                    data: consumptions_1,
+                    borderColor: '#1E3A5F',
+                    backgroundColor: 'rgba(46, 134, 171, 0.12)',
+                    pointBackgroundColor: '#2E86AB',
+                    pointBorderColor: '#2E86AB',
+                    borderWidth: 3,
+                    tension: 0.35,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#1A202C'
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            color: '#718096'
+                        },
+                        grid: {
+                            color: 'rgba(113, 128, 150, 0.08)'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: '#718096'
+                        },
+                        grid: {
+                            color: 'rgba(113, 128, 150, 0.12)'
+                        }
+                    }
+                }
+            }
+        });
     }
-  });
+
+    const ctx_2 = document.getElementById('onea_chart');
+    const periods_2 = {{ periods_2|safe }};
+    const consumptions_2 = {{ consumptions_2|safe }};
+
+    if (ctx_2) {
+        new Chart(ctx_2, {
+            type: 'line',
+            data: {
+                labels: periods_2,
+                datasets: [{
+                    label: 'Consommation ONEA (m³)',
+                    data: consumptions_2,
+                    borderColor: '#1E3A5F',
+                    backgroundColor: 'rgba(46, 134, 171, 0.12)',
+                    pointBackgroundColor: '#2E86AB',
+                    pointBorderColor: '#2E86AB',
+                    borderWidth: 3,
+                    tension: 0.35,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#1A202C'
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            color: '#718096'
+                        },
+                        grid: {
+                            color: 'rgba(113, 128, 150, 0.08)'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: '#718096'
+                        },
+                        grid: {
+                            color: 'rgba(113, 128, 150, 0.12)'
+                        }
+                    }
+                }
+            }
+        });
+    }
 </script>
 {% endblock %}

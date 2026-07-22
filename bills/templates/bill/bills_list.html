@@ -3,57 +3,62 @@
 {% block title %}Liste des factures - FacTrack{% endblock %}
 
 {% block content %}
-<div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+<div class="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-slate-200 sm:p-6 lg:p-8">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-            <p class="text-sm font-medium uppercase tracking-wide text-slate-500">Gestion</p>
-            <h1 class="mt-1 text-3xl font-semibold text-slate-900">Liste des factures</h1>
+            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-secondary">Gestion des factures</p>
+            <h1 class="mt-2 text-3xl font-bold tracking-tight text-primary sm:text-4xl">Liste des factures</h1>
+            <p class="mt-2 text-sm text-textSecondary">Suivez le statut, les montants et les consommations de chaque facture.</p>
         </div>
-        <a href="{% url 'add_bills' %}" class="rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700">
-            Ajouter une facture
-        </a>
+        <a href="{% url 'add_bills' %}" class="inline-flex items-center justify-center rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:shadow-soft">Ajouter une facture</a>
     </div>
 
-    <div class="mt-6 overflow-hidden rounded-xl border border-slate-200">
-        <table class="min-w-full divide-y divide-slate-200 text-sm">
-            <thead class="bg-slate-50 text-left text-slate-600">
+    <div class="mt-6 overflow-x-auto rounded-2xl border border-slate-200">
+        <table class="min-w-[1100px] w-full border-collapse text-left text-sm">
+            <thead class="bg-primary text-white">
                 <tr>
-                    <th class="px-4 py-3 font-semibold">Type</th>
-                    <th class="px-4 py-3 font-semibold">Periode</th>
-                    <th class="px-4 py-3 font-semibold">Date limite</th>
-                    <th class="px-4 py-3 font-semibold">Prix total</th>
-                    <th class="px-4 py-3 font-semibold">Ancien index</th>
-                    <th class="px-4 py-3 font-semibold">Nouveau index</th>
-                    <th class="px-4 py-3 font-semibold">Consommation</th>
-                    <th class="px-4 py-3 font-semibold">Statut</th>
-                    <th class="px-4 py-3 font-semibold">Actions</th>
+                    <th class="px-4 py-4 font-semibold">Type</th>
+                    <th class="px-4 py-4 font-semibold">Période</th>
+                    <th class="px-4 py-4 font-semibold">Date limite</th>
+                    <th class="px-4 py-4 font-semibold">Prix</th>
+                    <th class="px-4 py-4 font-semibold">Ancien index</th>
+                    <th class="px-4 py-4 font-semibold">Nouveau index</th>
+                    <th class="px-4 py-4 font-semibold">Consommation</th>
+                    <th class="px-4 py-4 font-semibold">Statut</th>
+                    <th class="px-4 py-4 font-semibold">Action</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-200 bg-white">
                 {% for bill in bills %}
-                <tr class="hover:bg-slate-50">
-                    <td class="px-4 py-3 font-medium">{{ bill.type }}</td>
-                    <td class="px-4 py-3">{{ bill.period|date:"m/Y" }}</td>
-                    <td class="px-4 py-3">{{ bill.deadline|date:"d/m/Y" }}</td>
-                    <td class="px-4 py-3">{{ bill.price_total }} FCFA</td>
-                    <td class="px-4 py-3">{{ bill.previous_index }}</td>
-                    <td class="px-4 py-3">{{ bill.new_index }}</td>
-                    <td class="px-4 py-3">{{ bill.total_consumption }}</td>
-                    <td class="px-4 py-3">
-                        <span class="rounded-full px-3 py-1 text-xs font-semibold {% if bill.paid %}bg-emerald-100 text-emerald-700{% else %}bg-amber-100 text-amber-700{% endif %}">
-                            {% if bill.paid %}Payee{% else %}Impayee{% endif %}
+                <tr class="odd:bg-white even:bg-slate-50 transition hover:bg-blue-50/40">
+                    <td class="px-4 py-4">
+                        {% if bill.type == 'SONABEL' %}
+                            <span class="inline-flex rounded-full bg-secondary/10 px-3 py-1 text-xs font-semibold text-secondary">SONABEL</span>
+                        {% else %}
+                            <span class="inline-flex rounded-full bg-teal-100 px-3 py-1 text-xs font-semibold text-teal-700">ONEA</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-4 text-textPrimary">{{ bill.period|date:"m/Y" }}</td>
+                    <td class="px-4 py-4 text-textPrimary">{{ bill.deadline|date:"d/m/Y" }}</td>
+                    <td class="px-4 py-4 font-semibold text-primary">{{ bill.price_total }} FCFA</td>
+                    <td class="px-4 py-4 text-textPrimary">{{ bill.previous_index }}</td>
+                    <td class="px-4 py-4 text-textPrimary">{{ bill.new_index }}</td>
+                    <td class="px-4 py-4 text-textPrimary">{{ bill.total_consumption }}</td>
+                    <td class="px-4 py-4">
+                        <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold {% if bill.paid %}bg-success/10 text-success{% else %}bg-danger/10 text-danger{% endif %}">
+                            {% if bill.paid %}Payée{% else %}Impayée{% endif %}
                         </span>
                     </td>
-                    <td class="px-4 py-3">
+                    <td class="px-4 py-4">
                         <form method="post" action="{% url 'toggle_bill' bill.id %}">
                             {% csrf_token %}
                             {% if bill.paid %}
-                                <button type="submit" class="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100">
-                                    Marquer comme impayee
+                                <button type="submit" class="rounded-xl border border-danger px-4 py-2 text-xs font-semibold text-danger transition hover:bg-danger hover:text-white">
+                                    Marquer comme impayée
                                 </button>
                             {% else %}
-                                <button type="submit" class="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100">
-                                    Marquer comme payee
+                                <button type="submit" class="rounded-xl border border-success px-4 py-2 text-xs font-semibold text-success transition hover:bg-success hover:text-white">
+                                    Marquer comme payée
                                 </button>
                             {% endif %}
                         </form>
@@ -61,15 +66,11 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="9" class="px-4 py-8 text-center text-slate-500">Aucune facture enregistree.</td>
+                    <td colspan="9" class="px-4 py-10 text-center text-textSecondary">Aucune facture enregistrée.</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-    </div>
-
-    <div class="mt-6">
-        <a href="{% url 'home' %}" class="text-sm font-medium text-slate-600 hover:text-slate-900">Retour au tableau de bord</a>
     </div>
 </div>
 {% endblock %}

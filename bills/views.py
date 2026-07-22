@@ -16,11 +16,20 @@ def home_view(request):
     unpaid_bills = Bill.objects.filter(paid=False).all()
     unpaid_bills_price = unpaid_bills.aggregate(Sum('price_total'))['price_total__sum'] or 0
 
+    sonabel_bills_descending = bills.filter(type='SONABEL').order_by('-period')
     sonabel_bills = bills.filter(type='SONABEL').order_by('period')
     sonabal_consumption = sonabel_bills.values_list('total_consumption', flat=True)
     sonabel_bills_period = sonabel_bills.values_list('period', flat=True)
-    periods = [d.strftime("%m/%Y") for d in sonabel_bills_period]
-    consumptions = list(sonabal_consumption)
+    periods_1 = [d.strftime("%m/%Y") for d in sonabel_bills_period]
+    consumptions_1 = list(sonabal_consumption)
+
+
+    onea_bills_descending = bills.filter(type='ONEA').order_by('-period')
+    onea_bills = bills.filter(type='ONEA').order_by('period')
+    onea_consumption = onea_bills.values_list('total_consumption', flat=True)
+    onea_bills_period = onea_bills.values_list('period', flat=True)
+    periods_2 = [d.strftime("%m/%Y") for d in onea_bills_period]
+    consumptions_2 = list(onea_consumption)    
 
     context = {
         'bills': bills,
@@ -28,12 +37,16 @@ def home_view(request):
         'unpaid_bills': unpaid_bills,
         'unpaid_bills_price': unpaid_bills_price,
 
-        # 'sonabel_bills': sonabel_bills,
+        'sonabel_bills_descending': sonabel_bills_descending,
+        'onea_bills_descending': onea_bills_descending,
         # 'sonabal_consumption': sonabal_consumption,
         # 'sonabel_bills_period': sonabel_bills_period,
 
-        'periods': periods,
-        'consumptions': consumptions,   
+        'periods_1': periods_1,
+        'consumptions_1': consumptions_1,   
+
+        'periods_2': periods_2,
+        'consumptions_2': consumptions_2,  
     }
     return render(request, 'bill/index.html', context)
 
