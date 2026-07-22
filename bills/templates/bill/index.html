@@ -1,34 +1,79 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <h1>SALUT</h1>
-    <!-- ✅ Fonctionne -->
-<form method="post" action="{% url 'logout' %}">
-    {% csrf_token %}
-    <button type="submit">Déconnexion</button>
-</form>
+﻿{% extends "base.html" %}
 
-{% if user.is_authenticated %}
-    <p>Bienvenue, {{ user.username }} !</p>
-{% else %}
-    <p>Vous n'êtes pas connecté.</p>
-{% endif %}
+{% block title %}Dashboard - FacTrack{% endblock %}
 
-
-<div>
-  <canvas id="myChart"></canvas>
-</div>
-
+{% block head %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
 
+{% block content %}
+<div class="space-y-8">
+    <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+                <p class="text-sm font-medium uppercase tracking-wide text-slate-500">Tableau de bord</p>
+                <h1 class="mt-1 text-3xl font-semibold text-slate-900">Suivi des factures</h1>
+                {% if user.is_authenticated %}
+                    <p class="mt-2 text-slate-600">Bienvenue, {{ user.username }}.</p>
+                {% else %}
+                    <p class="mt-2 text-slate-600">Vous n'etes pas connecte.</p>
+                {% endif %}
+            </div>
+            <div class="flex gap-3">
+                <a href="{% url 'add_bills' %}" class="rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700">Ajouter une facture</a>
+                <a href="{% url 'bills_list' %}" class="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Voir les factures</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="grid gap-4 md:grid-cols-3">
+        <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+            <p class="text-sm text-slate-500">Total factures</p>
+            <p class="mt-2 text-3xl font-semibold">{{ all_bills_price }} FCFA</p>
+        </div>
+        <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+            <p class="text-sm text-slate-500">Factures impayees</p>
+            <p class="mt-2 text-3xl font-semibold">{{ unpaid_bills|length }}</p>
+        </div>
+        <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+            <p class="text-sm text-slate-500">Montant impaye</p>
+            <p class="mt-2 text-3xl font-semibold">{{ unpaid_bills_price }} FCFA</p>
+        </div>
+    </section>
+
+    <section class="grid gap-6 lg:grid-cols-2">
+        <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+            <h2 class="text-lg font-semibold text-slate-900">Consommation SONABEL</h2>
+            <div class="mt-4">
+                <canvas id="myChart" height="140"></canvas>
+            </div>
+        </div>
+
+        <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+            <h2 class="text-lg font-semibold text-slate-900">Dernieres factures</h2>
+            <div class="mt-4 space-y-3">
+                {% for bill in bills %}
+                    <div class="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3">
+                        <div>
+                            <p class="font-medium">{{ bill.type }}</p>
+                            <p class="text-sm text-slate-500">Facture du {{ bill.period|date:"m/Y" }}</p>
+                        </div>
+                        <p class="text-sm font-semibold {% if bill.paid %}text-emerald-600{% else %}text-amber-600{% endif %}">
+                            {% if bill.paid %}Payee{% else %}Impayee{% endif %}
+                        </p>
+                    </div>
+                {% empty %}
+                    <p class="text-slate-500">Aucune facture disponible.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
 <script>
   const ctx = document.getElementById('myChart');
-
   const periods = {{ periods|safe }};
   const consumptions = {{ consumptions|safe }};
 
@@ -39,36 +84,19 @@
       datasets: [{
         label: 'Consommation SONABEL (kWh)',
         data: consumptions,
-        borderColor: 'rgb(75, 192, 192)',
+        borderColor: 'rgb(15, 23, 42)',
+        backgroundColor: 'rgba(15, 23, 42, 0.08)',
         borderWidth: 2,
         tension: 0.3,
-        fill: false
+        fill: true
       }]
     },
     options: {
+      responsive: true,
       scales: {
-        y: {
-          beginAtZero: true
-        },
-        
+        y: { beginAtZero: true }
       }
     }
   });
 </script>
- 
- 
-
-{% for bill in bills%}
-    <p>Facture {{ bill.type }} du {{ bill.period }}</p>
-{% endfor %}
-
-<p>Prix total des factures {{ all_bills_price }} FCFA</p>
-
-
-<p>Il y a {{ unpaid_bills|length }} factures impaiyer pour un total de {{ unpaid_bills_price }} FCFA</p>
-
-<a href="{% url 'add_bills' %}">Ajouter une facture</a>
-<a href="{% url 'bills_list' %}">Voir les factures </a>
-
-</body>
-</html>
+{% endblock %}

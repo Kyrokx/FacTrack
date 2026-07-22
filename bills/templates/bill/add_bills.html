@@ -1,21 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    
+﻿{% extends "base.html" %}
 
-    <form method="post" action="{% url 'add_bills' %}">
+{% block title %}Ajouter une facture - FacTrack{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+    <h1 class="text-3xl font-semibold text-slate-900">Ajouter une facture</h1>
+    <p class="mt-2 text-slate-600">Renseignez les details de la facture ci-dessous.</p>
+
+    <form method="post" action="{% url 'add_bills' %}" class="mt-6 space-y-5">
         {% csrf_token %}
-        {{form.as_p}}
+        <div class="space-y-4">
+            {{ form.as_p }}
+        </div>
 
-        <button type="submit">Ajouter</button>
-
+        <button type="submit" class="rounded-full bg-slate-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-slate-700">
+            Ajouter
+        </button>
     </form>
-
-
-</body>
-</html>
+</div>
+{% endblock %}

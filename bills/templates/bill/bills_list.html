@@ -1,58 +1,75 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liste des factures</title>
-</head>
-<body>
-    <h1>Liste des factures</h1>
-    <a href="{% url 'add_bills' %}">Ajouter une facture</a>
+﻿{% extends "base.html" %}
 
-    <table border="1">
-        <thead>
-            <tr>
-                <th>Type</th>
-                <th>Période</th>
-                <th>Date limite</th>
-                <th>Prix total</th>
-                <th>Ancien index</th>
-                <th>Nouveau index</th>
-                <th>Consommation</th>
-                <th>Statut</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for bill in bills %}
-            <tr>
-                <td>{{ bill.type }}</td>
-                <td>{{ bill.period|date:"m/Y" }}</td>
-                <td>{{ bill.deadline|date:"d/m/Y" }}</td>
-                <td>{{ bill.price_total }} FCFA</td>
-                <td>{{ bill.previous_index }}</td>
-                <td>{{ bill.new_index }}</td>
-                <td>{{ bill.total_consumption }}</td>
-                <td>{% if bill.paid %}Payée{% else %}Impayée{% endif %}</td>
-                <td>
-                    <form method="post" action="{% url 'toggle_bill' bill.id %}">
-                        {% csrf_token %}
-                        {% if bill.paid %}
-                            <button type="submit">Marquer comme impayée</button>
-                        {% else %}
-                            <button type="submit">Marquer comme payée</button>
-                        {% endif %}
-                    </form>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="9">Aucune facture enregistrée.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+{% block title %}Liste des factures - FacTrack{% endblock %}
 
-    <a href="{% url 'home' %}">Home</a>
-</body>
-</html>
+{% block content %}
+<div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+            <p class="text-sm font-medium uppercase tracking-wide text-slate-500">Gestion</p>
+            <h1 class="mt-1 text-3xl font-semibold text-slate-900">Liste des factures</h1>
+        </div>
+        <a href="{% url 'add_bills' %}" class="rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700">
+            Ajouter une facture
+        </a>
+    </div>
+
+    <div class="mt-6 overflow-hidden rounded-xl border border-slate-200">
+        <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <thead class="bg-slate-50 text-left text-slate-600">
+                <tr>
+                    <th class="px-4 py-3 font-semibold">Type</th>
+                    <th class="px-4 py-3 font-semibold">Periode</th>
+                    <th class="px-4 py-3 font-semibold">Date limite</th>
+                    <th class="px-4 py-3 font-semibold">Prix total</th>
+                    <th class="px-4 py-3 font-semibold">Ancien index</th>
+                    <th class="px-4 py-3 font-semibold">Nouveau index</th>
+                    <th class="px-4 py-3 font-semibold">Consommation</th>
+                    <th class="px-4 py-3 font-semibold">Statut</th>
+                    <th class="px-4 py-3 font-semibold">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 bg-white">
+                {% for bill in bills %}
+                <tr class="hover:bg-slate-50">
+                    <td class="px-4 py-3 font-medium">{{ bill.type }}</td>
+                    <td class="px-4 py-3">{{ bill.period|date:"m/Y" }}</td>
+                    <td class="px-4 py-3">{{ bill.deadline|date:"d/m/Y" }}</td>
+                    <td class="px-4 py-3">{{ bill.price_total }} FCFA</td>
+                    <td class="px-4 py-3">{{ bill.previous_index }}</td>
+                    <td class="px-4 py-3">{{ bill.new_index }}</td>
+                    <td class="px-4 py-3">{{ bill.total_consumption }}</td>
+                    <td class="px-4 py-3">
+                        <span class="rounded-full px-3 py-1 text-xs font-semibold {% if bill.paid %}bg-emerald-100 text-emerald-700{% else %}bg-amber-100 text-amber-700{% endif %}">
+                            {% if bill.paid %}Payee{% else %}Impayee{% endif %}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3">
+                        <form method="post" action="{% url 'toggle_bill' bill.id %}">
+                            {% csrf_token %}
+                            {% if bill.paid %}
+                                <button type="submit" class="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100">
+                                    Marquer comme impayee
+                                </button>
+                            {% else %}
+                                <button type="submit" class="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100">
+                                    Marquer comme payee
+                                </button>
+                            {% endif %}
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="px-4 py-8 text-center text-slate-500">Aucune facture enregistree.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-6">
+        <a href="{% url 'home' %}" class="text-sm font-medium text-slate-600 hover:text-slate-900">Retour au tableau de bord</a>
+    </div>
+</div>
+{% endblock %}

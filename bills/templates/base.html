@@ -1,0 +1,36 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FacTrack{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    {% block head %}{% endblock %}
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-900">
+    <nav class="border-b border-slate-200 bg-white/90 backdrop-blur">
+        <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+            <a href="{% url 'home' %}" class="text-xl font-semibold tracking-tight text-slate-900">FacTrack</a>
+            <div class="flex items-center gap-4 text-sm font-medium">
+                <a href="{% url 'home' %}" class="text-slate-600 hover:text-slate-900">Dashboard</a>
+                <a href="{% url 'bills_list' %}" class="text-slate-600 hover:text-slate-900">Factures</a>
+                <a href="{% url 'add_bills' %}" class="text-slate-600 hover:text-slate-900">Ajouter</a>
+                {% if user.is_authenticated %}
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="rounded-full bg-slate-900 px-4 py-2 text-white transition hover:bg-slate-700">
+                        Deconnexion
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="mx-auto max-w-6xl px-4 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

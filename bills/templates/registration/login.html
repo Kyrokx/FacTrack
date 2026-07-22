@@ -1,12 +1,18 @@
-<!DOCTYPE html>
-<html>
-<head><title>Connexion - FacTrack</title></head>
-<body>
-    <h1>Connexion</h1>
-    <form method="post">
+﻿{% extends "base.html" %}
+
+{% block title %}Connexion - FacTrack{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-md rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+    <h1 class="text-3xl font-semibold text-slate-900">Connexion</h1>
+    <p class="mt-2 text-slate-600">Accedez a votre espace FacTrack.</p>
+
+    <form method="post" class="mt-6 space-y-5">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit">Se connecter</button>
+        <button type="submit" class="rounded-full bg-slate-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-slate-700">
+            Se connecter
+        </button>
     </form>
-</body>
-</html>
+</div>
+{% endblock %}
