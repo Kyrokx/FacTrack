@@ -1,176 +1,230 @@
 # FacTrack
 
-FacTrack est une application web Django de suivi des factures d’eau et d’électricité pour un foyer au Burkina Faso.  
-Elle permet d’enregistrer les factures, de visualiser les montants payés et impayés, et de suivre la consommation au fil du temps.
+FacTrack is a Django web app for tracking household utility bills, with a focus on SONABEL and ONEA invoices.
 
-## Fonctionnalités
+The app lets you:
 
-- Authentification utilisateur avec connexion / déconnexion
-- Tableau de bord avec :
-  - total des factures
-  - total des factures impayées
-  - montant total impayé
-  - graphiques de consommation
-- Liste complète des factures
-- Ajout d’une nouvelle facture
-- Bascule du statut payé / impayé
-- Interface responsive avec Tailwind CSS via CDN
+- add and manage bills
+- track paid and unpaid status
+- compare SONABEL and ONEA consumption over time
+- view separate bill lists for SONABEL and ONEA
+- sort each bill type independently in the bills page
 
-## Technologies utilisées
+## Features
+
+- Authentication with login and logout
+- Dashboard with:
+  - total bill amount
+  - unpaid bill count
+  - unpaid amount total
+  - consumption charts for SONABEL and ONEA
+  - recent SONABEL and ONEA bills
+- Bills list split into two sections:
+  - SONABEL table
+  - ONEA table
+- Independent sorting for each bill type
+- Add bill form
+- Toggle paid / unpaid status
+- Responsive UI built with Tailwind CSS via CDN
+- Charts powered by Chart.js via CDN
+
+## Tech Stack
 
 - Python 3
 - Django 5.2
-- SQLite
+- PostgreSQL in development when `DEBUG=True`
+- `dj-database-url` for production database config
+- `python-dotenv` and `python-decouple` for environment variables
+- WhiteNoise for static file serving
 - Tailwind CSS via CDN
 - Chart.js via CDN
-- `python-dotenv` pour la configuration via fichier `.env`
 
-## Structure du projet
+## Project Structure
 
 ```text
 factrack/
 ├── manage.py
 ├── requirements.txt
-├── db.sqlite3
+├── Procfile
 ├── config/
 │   ├── settings.py
 │   ├── urls.py
 │   ├── asgi.py
 │   └── wsgi.py
 └── bills/
-    ├── models.py
-    ├── views.py
-    ├── forms.py
     ├── admin.py
-    ├── templates/
-    │   ├── base.html
-    │   ├── bill/
-    │   │   ├── index.html
-    │   │   ├── bills_list.html
-    │   │   └── add_bills.html
-    │   └── registration/
-    │       └── login.html
-    └── migrations/
+    ├── apps.py
+    ├── forms.py
+    ├── models.py
+    ├── tests.py
+    ├── views.py
+    ├── migrations/
+    └── templates/
+        ├── base.html
+        ├── bill/
+        │   ├── index.html
+        │   ├── bills_list.html
+        │   └── add_bills.html
+        └── registration/
+            └── login.html
 ```
 
-## Modèle de données
+## Data Model
 
-L’application repose sur un modèle principal : `Bill`.
+The app currently uses one model: `Bill`.
 
-### Champs du modèle `Bill`
+### `Bill`
 
-- `type` : type de facture (`SONABEL` ou `ONEA`)
-- `period` : période de la facture
-- `deadline` : date limite de paiement
-- `price_total` : montant total
-- `previous_index` : ancien index
-- `new_index` : nouvel index
-- `total_consumption` : consommation totale
-- `paid` : statut payé / impayé
+- `type`: bill type, either `SONABEL` or `ONEA`
+- `period`: billing period
+- `deadline`: payment deadline
+- `price_total`: total amount
+- `previous_index`: previous meter index
+- `new_index`: new meter index
+- `total_consumption`: total consumption
+- `paid`: paid/unpaid flag
 
-Les factures sont triées par défaut par ordre décroissant de période.
+The model default ordering is descending by `period`.
 
-## Pages disponibles
+## Main Pages
 
-### 1. Connexion
+### Dashboard
 
-- URL : `/login/`
-- Permet à l’utilisateur de se connecter pour accéder à l’application.
+- URL: `/`
+- Template: `bill/index.html`
+- Shows totals, charts, and recent bills for each bill type
 
-### 2. Tableau de bord
+### Bills List
 
-- URL : `/`
-- Affiche les statistiques générales et les graphiques de consommation.
+- URL: `/bills/`
+- Template: `bill/bills_list.html`
+- Shows SONABEL and ONEA in separate tables
+- Each table has its own sort controls
 
-### 3. Liste des factures
+### Add Bill
 
-- URL : `/bills/`
-- Affiche toutes les factures dans un tableau responsive.
+- URL: `/add/`
+- Template: `bill/add_bills.html`
+- Creates a new bill through a form
 
-### 4. Ajouter une facture
+### Login
 
-- URL : `/add/`
-- Permet de créer une nouvelle facture via un formulaire.
+- URL: `/login/`
+- Template: `registration/login.html`
 
-### 5. Déconnexion
+### Logout
 
-- URL : `/logout/`
-- Action effectuée par formulaire `POST` avec protection CSRF.
+- URL: `/logout/`
+- Uses a POST request
 
-## Configuration
+### Admin
 
-Le projet utilise un fichier `.env` pour charger certaines variables sensibles.
+- URL: `/admin/`
+- Django admin is enabled for `Bill`
 
-### Variables d’environnement attendues
+## URL Routes
+
+Defined in `config/urls.py`:
+
+- `/login/` -> Django login view
+- `/logout/` -> Django logout view
+- `/` -> dashboard
+- `/add/` -> add bill
+- `/bills/` -> bills list
+- `/toggle/<int:id>/` -> toggle paid status
+- `/admin/` -> Django admin
+
+## Environment Variables
+
+The project expects these environment variables:
 
 - `SECRET_KEY`
 - `DEBUG`
+- `ALLOWED_HOSTS`
+- `DB_NAME`
+- `DB_USER`
+- `DB_PASSWORD`
+- `DB_HOST`
+- `DB_PORT`
+- `DATABASE_URL` for production
 
-Exemple :
+Example `.env`:
 
 ```env
 SECRET_KEY=your-secret-key
 DEBUG=True
+ALLOWED_HOSTS=127.0.0.1,localhost
+DB_NAME=factrack
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_HOST=localhost
+DB_PORT=5432
 ```
 
-## Installation
+## Local Setup
 
-### 1. Créer et activer un environnement virtuel
+1. Create a virtual environment:
 
 ```bash
 python -m venv venv
 venv\Scripts\activate
 ```
 
-### 2. Installer les dépendances
+2. Install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Appliquer les migrations
+3. Apply migrations:
 
 ```bash
 python manage.py migrate
 ```
 
-### 4. Créer un superutilisateur
+4. Create a superuser:
 
 ```bash
 python manage.py createsuperuser
 ```
 
-### 5. Lancer le serveur
+5. Run the development server:
 
 ```bash
 python manage.py runserver
 ```
 
-## Utilisation
+## Usage
 
-1. Connectez-vous avec un compte utilisateur.
-2. Ajoutez une facture via la page dédiée.
-3. Consultez le tableau de bord pour suivre les montants et la consommation.
-4. Ouvrez la liste des factures pour modifier leur statut payé / impayé.
+1. Log in with a Django user account.
+2. Add SONABEL or ONEA bills from the add page.
+3. Open the dashboard to see totals and charts.
+4. Open the bills page to review SONABEL and ONEA separately.
+5. Use the toggle action to switch a bill between paid and unpaid.
 
-## Administration Django
+## Implementation Notes
 
-L’interface d’administration Django est activée pour le modèle `Bill`.
+- Templates use Tailwind via CDN, so no local frontend build step is required.
+- Dashboard charts use Chart.js via CDN.
+- The bills list is split into two sections:
+  - SONABEL on one side
+  - ONEA on the other
+- Sorting is handled separately for each bill type through query parameters.
+- Authentication-protected views are decorated with `login_required`.
+- `toggle_bill` flips the `paid` boolean and redirects back to the bills list.
 
-- URL : `/admin/`
+## Notes on Deployment
 
-## Remarques techniques
+- `WhiteNoise` is already configured for static files.
+- Database configuration switches by `DEBUG`:
+  - local development uses PostgreSQL settings from the environment
+  - production uses `DATABASE_URL`
 
-- Les templates utilisent Tailwind CSS via CDN, sans compilation locale.
-- Les graphiques sont rendus avec Chart.js via CDN.
-- Les pages sont pensées pour être lisibles sur mobile, tablette et desktop.
-- Les actions sensibles comme la déconnexion et le basculement payé / impayé utilisent des formulaires `POST`.
+## Possible Next Improvements
 
-## Améliorations possibles
-
-- Ajouter des tests automatisés
-- Permettre l’édition et la suppression des factures
-- Ajouter des filtres par type, période ou statut
-- Ajouter l’export PDF ou Excel
-- Améliorer la gestion multi-utilisateurs
+- Add edit and delete actions for bills
+- Add filters by paid status, date range, or amount
+- Add test coverage for views and forms
+- Add export to PDF or Excel
+- Add pagination for the bills list
 

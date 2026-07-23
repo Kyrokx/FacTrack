@@ -16,7 +16,7 @@ def home_view(request):
     unpaid_bills = Bill.objects.filter(paid=False).all()
     unpaid_bills_price = unpaid_bills.aggregate(Sum('price_total'))['price_total__sum'] or 0
 
-    sonabel_bills_descending = bills.filter(type='SONABEL').order_by('-period')
+    sonabel_bills_descending = bills.filter(type='SONABEL').order_by('-period')[:5]
     sonabel_bills = bills.filter(type='SONABEL').order_by('period')
 
     all_sonabel_bills_price = Bill.objects.filter(type="SONABEL").aggregate(Sum('price_total'))['price_total__sum'] or 0
@@ -27,7 +27,7 @@ def home_view(request):
     consumptions_1 = list(sonabal_consumption)
 
 
-    onea_bills_descending = bills.filter(type='ONEA').order_by('-period')
+    onea_bills_descending = bills.filter(type='ONEA').order_by('-period')[:5]
     onea_bills = bills.filter(type='ONEA').order_by('period')
 
     all_onea_bills_price = Bill.objects.filter(type="ONEA").aggregate(Sum('price_total'))['price_total__sum'] or 0
