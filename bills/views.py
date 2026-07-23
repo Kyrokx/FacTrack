@@ -18,6 +18,9 @@ def home_view(request):
 
     sonabel_bills_descending = bills.filter(type='SONABEL').order_by('-period')
     sonabel_bills = bills.filter(type='SONABEL').order_by('period')
+
+    all_sonabel_bills_price = Bill.objects.filter(type="SONABEL").aggregate(Sum('price_total'))['price_total__sum'] or 0
+
     sonabal_consumption = sonabel_bills.values_list('total_consumption', flat=True)
     sonabel_bills_period = sonabel_bills.values_list('period', flat=True)
     periods_1 = [d.strftime("%m/%Y") for d in sonabel_bills_period]
@@ -26,6 +29,9 @@ def home_view(request):
 
     onea_bills_descending = bills.filter(type='ONEA').order_by('-period')
     onea_bills = bills.filter(type='ONEA').order_by('period')
+
+    all_onea_bills_price = Bill.objects.filter(type="ONEA").aggregate(Sum('price_total'))['price_total__sum'] or 0
+
     onea_consumption = onea_bills.values_list('total_consumption', flat=True)
     onea_bills_period = onea_bills.values_list('period', flat=True)
     periods_2 = [d.strftime("%m/%Y") for d in onea_bills_period]
@@ -39,6 +45,9 @@ def home_view(request):
 
         'sonabel_bills_descending': sonabel_bills_descending,
         'onea_bills_descending': onea_bills_descending,
+
+        'all_sonabel_bills_price': all_sonabel_bills_price,
+        'all_onea_bills_price': all_onea_bills_price,
         # 'sonabal_consumption': sonabal_consumption,
         # 'sonabel_bills_period': sonabel_bills_period,
 

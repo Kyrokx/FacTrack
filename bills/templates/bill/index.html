@@ -12,8 +12,8 @@
         <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div class="max-w-2xl space-y-2">
                 <p class="text-sm font-semibold uppercase tracking-[0.2em] text-secondary">Tableau de bord</p>
-                <h1 class="text-3xl font-bold tracking-tight text-primary sm:text-4xl">Suivi des factures du foyer</h1>
-                <p class="text-sm leading-6 text-textSecondary sm:text-base">Vue d’ensemble des montants, impayés et consommations SONABEL dans une interface claire et adaptée à tous les écrans.</p>
+                <h1 class="text-3xl font-bold tracking-tight text-primary sm:text-4xl">Suivi des factures de la maison</h1>
+                <p class="text-sm leading-6 text-textSecondary sm:text-base">Vue d’ensemble des montants, impayés et consommations SONABEL et ONEA. </p>
             </div>
             <div class="flex flex-col gap-3 sm:flex-row">
                 <a href="{% url 'add_bills' %}" class="inline-flex items-center justify-center rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:shadow-soft">Ajouter une facture</a>
@@ -26,6 +26,8 @@
         <article class="rounded-3xl bg-white p-6 shadow-soft ring-1 ring-slate-200">
             <p class="text-sm font-medium text-textSecondary">Total des factures</p>
             <p class="mt-3 text-3xl font-bold text-primary">{{ all_bills_price }} FCFA</p>
+            <p class="mt-3 text-1xl font-bold text-secondary">SONABEL : {{ all_sonabel_bills_price }} FCFA</p>
+            <p class="mt-3 text-1xl font-bold text-secondary">ONEA : {{ all_onea_bills_price }} FCFA</p>
             <p class="mt-2 text-sm text-textSecondary">Montant cumulé toutes factures confondues.</p>
         </article>
         <article class="rounded-3xl bg-white p-6 shadow-soft ring-1 ring-slate-200">
