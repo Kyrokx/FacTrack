@@ -63,8 +63,11 @@ def add_bills(request):
 
 @login_required
 def bills_list(request):
+    type_filter = request.GET.get('type')  # récupère ?type=SONABEL ou ?type=ONEA
     bills = Bill.objects.all()
-    return render(request, 'bill/bills_list.html', {'bills': bills})
+    if type_filter in ['SONABEL', 'ONEA']:
+        bills = bills.filter(type=type_filter)
+    return render(request, 'bill/bills_list.html', {'bills': bills, 'active_filter': type_filter})
 
 @login_required
 def toggle_bill(request, id):

@@ -10,7 +10,26 @@
             <h1 class="mt-2 text-3xl font-bold tracking-tight text-primary sm:text-4xl">Liste des factures</h1>
             <p class="mt-2 text-sm text-textSecondary">Suivez le statut, les montants et les consommations de chaque facture.</p>
         </div>
+        <div class="flex gap-2 mt-4">
+    <a href="{% url 'bills_list' %}" 
+       class="px-4 py-2 rounded-xl text-sm font-semibold transition duration-200
+              {% if not active_filter %}bg-primary text-white{% else %}border border-slate-300 text-textSecondary hover:bg-slate-100{% endif %}">
+        Toutes
+    </a>
+    <a href="{% url 'bills_list' %}?type=SONABEL" 
+       class="px-4 py-2 rounded-xl text-sm font-semibold transition duration-200
+              {% if active_filter == 'SONABEL' %}bg-secondary text-white{% else %}border border-slate-300 text-textSecondary hover:bg-slate-100{% endif %}">
+        ⚡ SONABEL
+    </a>
+    <a href="{% url 'bills_list' %}?type=ONEA" 
+       class="px-4 py-2 rounded-xl text-sm font-semibold transition duration-200
+              {% if active_filter == 'ONEA' %}bg-teal-600 text-white{% else %}border border-slate-300 text-textSecondary hover:bg-slate-100{% endif %}">
+        💧 ONEA
+    </a>
+</div>
+
         <a href="{% url 'add_bills' %}" class="inline-flex items-center justify-center rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:shadow-soft">Ajouter une facture</a>
+
     </div>
 
     <div class="mt-6 overflow-x-auto rounded-2xl border border-slate-200">
