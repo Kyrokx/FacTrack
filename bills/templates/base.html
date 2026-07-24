@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}FacTrack{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -47,13 +48,35 @@
                 </button>
 
                 <div class="hidden items-center gap-2 lg:flex">
-                    <a href="{% url 'home' %}" class="rounded-lg px-4 py-2 text-sm font-medium transition {% if request.resolver_match.url_name == 'home' %}bg-primary text-white shadow-soft{% else %}text-textSecondary hover:bg-slate-100 hover:text-primary{% endif %}">Dashboard</a>
-                    <a href="{% url 'bills_list' %}" class="rounded-lg px-4 py-2 text-sm font-medium transition {% if request.resolver_match.url_name == 'bills_list' %}bg-primary text-white shadow-soft{% else %}text-textSecondary hover:bg-slate-100 hover:text-primary{% endif %}">Factures</a>
-                    <a href="{% url 'add_bills' %}" class="rounded-lg px-4 py-2 text-sm font-medium transition {% if request.resolver_match.url_name == 'add_bills' %}bg-primary text-white shadow-soft{% else %}text-textSecondary hover:bg-slate-100 hover:text-primary{% endif %}">Ajouter</a>
+                    <a href="{% url 'home' %}" class="rounded-lg px-4 py-2 text-sm font-medium transition {% if request.resolver_match.url_name == 'home' %}bg-primary text-white shadow-soft{% else %}text-textSecondary hover:bg-slate-100 hover:text-primary{% endif %}">
+                        <span class="flex items-center gap-2">
+                            <i data-lucide="layout-dashboard"></i>
+                            <span>Dashboard</span>
+                        </span>
+                    </a>
+                    <a href="{% url 'bills_list' %}" class="rounded-lg px-4 py-2 text-sm font-medium transition {% if request.resolver_match.url_name == 'bills_list' %}bg-primary text-white shadow-soft{% else %}text-textSecondary hover:bg-slate-100 hover:text-primary{% endif %}">
+                        <span class="flex items-center gap-2">
+                            <i data-lucide="receipt-text"></i>  
+                            <span>Factures</span>
+                        </span>
+                    </a>
+                    <a href="{% url 'add_bills' %}" class="rounded-lg px-4 py-2 text-sm font-medium transition {% if request.resolver_match.url_name == 'add_bills' %}bg-primary text-white shadow-soft{% else %}text-textSecondary hover:bg-slate-100 hover:text-primary{% endif %}">
+                        <span class="flex items-center gap-2">
+                            <i data-lucide="plus-circle"></i>
+                            <span>Ajouter</span>
+                        </span>
+
+
+                    </a>
                     {% if user.is_authenticated %}
                     <form method="post" action="{% url 'logout' %}" class="ml-2">
                         {% csrf_token %}
-                        <button type="submit" class="rounded-lg bg-danger px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90">Déconnexion</button>
+                        <button type="submit" class="rounded-lg bg-danger px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90">
+                            <span class="flex items-center gap-2">
+                            <i data-lucide="log-out"></i>  
+                            <span>Déconnexion</span>
+                        </span>
+                        </button>
                     </form>
                     {% endif %}
                 </div>
@@ -97,5 +120,8 @@
             });
         }
     </script>
+    <script>
+  lucide.createIcons();
+</script>
 </body>
 </html>

@@ -23,8 +23,30 @@ def home_view(request):
 
     sonabal_consumption = sonabel_bills.values_list('total_consumption', flat=True)
     sonabel_bills_period = sonabel_bills.values_list('period', flat=True)
+    average_sonabel_consumption = sum(sonabal_consumption) / len(sonabal_consumption) if sonabal_consumption else 0
+
+    # percentage sonabel consumption compared to the previous month
+    sonabel_consumptions_list = list(sonabal_consumption)
+    sonabel_consumption_percentage = 0
+    if len(sonabel_consumptions_list) >= 2:
+        last = sonabel_consumptions_list[-1]
+        prev = sonabel_consumptions_list[-2]
+        if prev:
+            sonabel_consumption_percentage = ((last - prev) / prev) * 100
+
+    average_sonabel_price = sum(bill.price_total for bill in sonabel_bills) / len(sonabel_bills) if sonabel_bills else 0
+    # percentage sonabel price compared to the previous month
+    sonabel_prices = sonabel_bills.values_list('price_total', flat=True)
+    sonabel_prices_list = list(sonabel_prices)
+    sonabel_price_percentage = 0
+    if len(sonabel_prices_list) >= 2:
+        last_price = sonabel_prices_list[-1]
+        prev_price = sonabel_prices_list[-2]
+        if prev_price:
+            sonabel_price_percentage = ((last_price - prev_price) / prev_price) * 100
+
     periods_1 = [d.strftime("%m/%Y") for d in sonabel_bills_period]
-    consumptions_1 = list(sonabal_consumption)
+    consumptions_1 = sonabel_consumptions_list
 
 
     onea_bills_descending = bills.filter(type='ONEA').order_by('-period')[:5]
@@ -34,6 +56,27 @@ def home_view(request):
 
     onea_consumption = onea_bills.values_list('total_consumption', flat=True)
     onea_bills_period = onea_bills.values_list('period', flat=True)
+    average_onea_consumption = sum(onea_consumption) / len(onea_consumption) if onea_consumption else 0
+    average_onea_price = sum(bill.price_total for bill in onea_bills) / len(onea_bills) if onea_bills else 0
+ # percentage onea consumption compared to the previous month
+    onea_consumptions_list = list(sonabal_consumption)
+    onea_consumption_percentage = 0
+    if len(onea_consumptions_list) >= 2:
+        last = onea_consumptions_list[-1]
+        prev = onea_consumptions_list[-2]
+        if prev:
+            onea_consumption_percentage = ((last - prev) / prev) * 100
+
+    average_onea_price = sum(bill.price_total for bill in onea_bills) / len(onea_bills) if onea_bills else 0
+    # percentage onea price compared to the previous month
+    onea_prices = onea_bills.values_list('price_total', flat=True)
+    onea_prices_list = list(onea_prices)
+    onea_price_percentage = 0
+    if len(onea_prices_list) >= 2:
+        last_price = onea_prices_list[-1]
+        prev_price = onea_prices_list[-2]
+        if prev_price:
+            onea_price_percentage = ((last_price - prev_price) / prev_price) * 100    
     periods_2 = [d.strftime("%m/%Y") for d in onea_bills_period]
     consumptions_2 = list(onea_consumption)    
 
@@ -48,6 +91,16 @@ def home_view(request):
 
         'all_sonabel_bills_price': all_sonabel_bills_price,
         'all_onea_bills_price': all_onea_bills_price,
+
+        'average_sonabel_consumption': average_sonabel_consumption,
+        'average_sonabel_price': average_sonabel_price,
+        'sonabel_consumption_percentage': sonabel_consumption_percentage,
+        'sonabel_price_percentage': sonabel_price_percentage,
+
+        'average_onea_consumption': average_onea_consumption,
+        'average_onea_price': average_onea_price,
+        'onea_consumption_percentage': onea_consumption_percentage,
+        'onea_price_percentage': onea_price_percentage,
         # 'sonabal_consumption': sonabal_consumption,
         # 'sonabel_bills_period': sonabel_bills_period,
 

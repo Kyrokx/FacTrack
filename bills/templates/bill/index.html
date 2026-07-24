@@ -11,13 +11,30 @@
     <section class="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-slate-200 sm:p-6 lg:p-8">
         <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div class="max-w-2xl space-y-2">
-                <p class="text-sm font-semibold uppercase tracking-[0.2em] text-secondary">Tableau de bord</p>
-                <h1 class="text-3xl font-bold tracking-tight text-primary sm:text-4xl">Suivi des factures de la maison</h1>
+                <p class="text-sm font-semibold uppercase tracking-[0.2em] text-secondary"> 
+
+                    <span class="flex items-center gap-2">
+                            <i data-lucide="layout-dashboard"></i>
+                            <span>Tableau de bord</span>
+                        </span>
+
+                </p>
+                <h1 class="text-3xl font-bold tracking-tight text-primary sm:text-4xl">Suivi des factures de la Maison</h1>
                 <p class="text-sm leading-6 text-textSecondary sm:text-base">Vue d’ensemble des montants, impayés et consommations SONABEL et ONEA. </p>
             </div>
             <div class="flex flex-col gap-3 sm:flex-row">
-                <a href="{% url 'add_bills' %}" class="inline-flex items-center justify-center rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:shadow-soft">Ajouter une facture</a>
-                <a href="{% url 'bills_list' %}" class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-primary transition duration-200 hover:-translate-y-0.5 hover:border-primary hover:text-primary">Voir les factures</a>
+                <a href="{% url 'add_bills' %}" class="inline-flex items-center justify-center rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:shadow-soft">
+                    <span class="flex items-center gap-2">
+                            <i data-lucide="plus-circle"></i>
+                            <span>Ajouter une facture</span>
+                        </span>
+                </a>
+                <a href="{% url 'bills_list' %}" class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-primary transition duration-200 hover:-translate-y-0.5 hover:border-primary hover:text-primary">
+                    <span class="flex items-center gap-2">
+                            <i data-lucide="eye"></i>
+                            <span>Voir les facures</span>
+                        </span>
+                </a>
             </div>
         </div>
     </section>
@@ -40,7 +57,21 @@
             <p class="mt-3 text-3xl font-bold text-accent">{{ unpaid_bills_price }} FCFA</p>
             <p class="mt-2 text-sm text-textSecondary">Somme totale des factures non réglées.</p>
         </article>
+    </section>    
+        <div class="sm:col-span-2 xl:col-span-3 border-t border-slate-200 my-4"><p class="text-sm font-large text-textSecondary text-center">Statistques</p></div>
+    <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-2">
+        <article class="rounded-3xl bg-white p-6 shadow-soft ring-1 ring-slate-200 sm:col-span-2 xl:col-span-1">
+            <p class="text-sm font-medium text-textSecondary">Statisques SONABEL</p>
+            <p class="mt-3 text-1xl font-bold text-primary">Conso. moyenne : {{ average_sonabel_consumption }} kwH (<span class="{% if sonabel_consumption_percentage >= 0 %}text-green-600{% else %}text-red-600{% endif %}">{% if sonabel_consumption_percentage >= 0 %}+{% endif %}{{ sonabel_consumption_percentage|floatformat:2 }}</span> %)</p>
+            <p class="mt-3 text-1xl font-bold text-primary">Prix moyen : {{ average_sonabel_price }} FCFA (<span class="{% if sonabel_consumption_percentage >= 0 %}text-green-600{% else %}text-red-600{% endif %}">{% if sonabel_price_percentage >= 0 %}+{% endif %}{{ sonabel_price_percentage|floatformat:2 }}</span> %)</p>
+        </article>
+        <article class="rounded-3xl bg-white p-6 shadow-soft ring-1 ring-slate-200 sm:col-span-2 xl:col-span-1">
+                <p class="text-sm font-medium text-textSecondary">Statisques ONEA</p>
+                <p class="mt-3 text-1xl font-bold text-primary">Conso. moyenne : {{ average_onea_consumption }} kwH (<span class="{% if onea_consumption_percentage >= 0 %}text-green-600{% else %}text-red-600{% endif %}">{% if onea_consumption_percentage >= 0 %}+{% endif %}{{ onea_consumption_percentage|floatformat:2 }}</span> %)</p>
+                <p class="mt-3 text-1xl font-bold text-primary">Prix moyen : {{ average_onea_price }} FCFA (<span class="{% if onea_consumption_percentage >= 0 %}text-green-600{% else %}text-red-600{% endif %}">{% if onea_price_percentage >= 0 %}+{% endif %}{{ onea_price_percentage|floatformat:2 }}</span> %)</p>
+            </article>
     </section>
+        <div class="sm:col-span-2 xl:col-span-3 border-t border-slate-200 my-4"><p class="text-sm font-large text-textSecondary text-center">Graphiques</p></div>
 
     <section class="grid gap-6 xl:grid-cols-2">
         <article class="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-slate-200 sm:p-6">
@@ -66,6 +97,10 @@
                 <canvas id="onea_chart" class="h-full w-full"></canvas>
             </div>
         </article>
+    </section>
+            <div class="sm:col-span-2 xl:col-span-3 border-t border-slate-200 my-4"><p class="text-sm font-large text-textSecondary text-center">5 dernieres factures</p></div>
+
+    <section class="grid gap-6 xl:grid-cols-2">
 
         <article class="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-slate-200 sm:p-6">
             <div class="flex items-center justify-between gap-4">
