@@ -8,88 +8,106 @@
         <div>
             <p class="text-sm font-semibold uppercase tracking-[0.2em] text-secondary">Gestion des factures</p>
             <h1 class="mt-2 text-3xl font-bold tracking-tight text-primary sm:text-4xl">Liste des factures</h1>
-            <p class="mt-2 text-sm text-textSecondary">Suivez le statut, les montants et les consommations de chaque facture.</p>
+            <p class="mt-2 text-sm text-textSecondary">Suivez le statut, les montants et les consommations de chaque
+                facture.</p>
         </div>
         <div class="flex gap-2 mt-4">
-    <a href="{% url 'bills_list' %}" 
-       class="px-4 py-2 rounded-xl text-sm font-semibold transition duration-200
+            <a href="{% url 'bills_list' %}"
+                class="px-4 py-2 rounded-xl text-sm font-semibold transition duration-200
               {% if not active_filter %}bg-primary text-white{% else %}border border-slate-300 text-textSecondary hover:bg-slate-100{% endif %}">
-        Toutes
-    </a>
-    <a href="{% url 'bills_list' %}?type=SONABEL" 
-       class="px-4 py-2 rounded-xl text-sm font-semibold transition duration-200
+                Toutes
+            </a>
+            <a href="{% url 'bills_list' %}?type=SONABEL"
+                class="px-4 py-2 rounded-xl text-sm font-semibold transition duration-200
               {% if active_filter == 'SONABEL' %}bg-secondary text-white{% else %}border border-slate-300 text-textSecondary hover:bg-slate-100{% endif %}">
-        ⚡ SONABEL
-    </a>
-    <a href="{% url 'bills_list' %}?type=ONEA" 
-       class="px-4 py-2 rounded-xl text-sm font-semibold transition duration-200
+                <span class="flex items-center gap-2">
+                    <i data-lucide="zap" class="w-4 h-4 text-yellow-500"></i>
+                    <span>SONABEL</span>
+                </span> </a>
+            <a href="{% url 'bills_list' %}?type=ONEA"
+                class="px-4 py-2 rounded-xl text-sm font-semibold transition duration-200
               {% if active_filter == 'ONEA' %}bg-teal-600 text-white{% else %}border border-slate-300 text-textSecondary hover:bg-slate-100{% endif %}">
-        💧 ONEA
-    </a>
+                <span class="flex items-center gap-2">
+                    <i data-lucide="droplets" class="w-4 h-4 text-cyan-500""></i>
+                            <span>ONEA</span>
+                        </span>    </a>
 </div>
 
-        <a href="{% url 'add_bills' %}" class="inline-flex items-center justify-center rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:shadow-soft">Ajouter une facture</a>
+        <a href=" {% url 'add_bills' %}"
+                        class="inline-flex items-center justify-center rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:shadow-soft">
+                        <span class="flex items-center gap-2">
 
-    </div>
-
-    <div class="mt-6 overflow-x-auto rounded-2xl border border-slate-200">
-        <table class="min-w-[1100px] w-full border-collapse text-left text-sm">
-            <thead class="bg-primary text-white">
-                <tr>
-                    <th class="px-4 py-4 font-semibold">Type</th>
-                    <th class="px-4 py-4 font-semibold">Période</th>
-                    <th class="px-4 py-4 font-semibold">Date limite</th>
-                    <th class="px-4 py-4 font-semibold">Prix</th>
-                    <th class="px-4 py-4 font-semibold">Ancien index</th>
-                    <th class="px-4 py-4 font-semibold">Nouveau index</th>
-                    <th class="px-4 py-4 font-semibold">Consommation</th>
-                    <th class="px-4 py-4 font-semibold">Statut</th>
-                    <th class="px-4 py-4 font-semibold">Action</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-200 bg-white">
-                {% for bill in bills %}
-                <tr class="odd:bg-white even:bg-slate-50 transition hover:bg-blue-50/40">
-                    <td class="px-4 py-4">
-                        {% if bill.type == 'SONABEL' %}
-                            <span class="inline-flex rounded-full bg-secondary/10 px-3 py-1 text-xs font-semibold text-secondary">SONABEL</span>
-                        {% else %}
-                            <span class="inline-flex rounded-full bg-teal-100 px-3 py-1 text-xs font-semibold text-teal-700">ONEA</span>
-                        {% endif %}
-                    </td>
-                    <td class="px-4 py-4 text-textPrimary">{{ bill.period|date:"m/Y" }}</td>
-                    <td class="px-4 py-4 text-textPrimary">{{ bill.deadline|date:"d/m/Y" }}</td>
-                    <td class="px-4 py-4 font-semibold text-primary">{{ bill.price_total }} FCFA</td>
-                    <td class="px-4 py-4 text-textPrimary">{{ bill.previous_index }}</td>
-                    <td class="px-4 py-4 text-textPrimary">{{ bill.new_index }}</td>
-                    <td class="px-4 py-4 text-textPrimary">{{ bill.total_consumption }}</td>
-                    <td class="px-4 py-4">
-                        <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold {% if bill.paid %}bg-success/10 text-success{% else %}bg-danger/10 text-danger{% endif %}">
-                            {% if bill.paid %}Payée{% else %}Impayée{% endif %}
+                            <i data-lucide="plus-circle"></i>
+                            <span>Ajouter une facture</span>
                         </span>
-                    </td>
-                    <td class="px-4 py-4">
-                        <form method="post" action="{% url 'toggle_bill' bill.id %}">
-                            {% csrf_token %}
-                            {% if bill.paid %}
-                                <button type="submit" class="rounded-xl border border-danger px-4 py-2 text-xs font-semibold text-danger transition hover:bg-danger hover:text-white">
+            </a>
+
+        </div>
+
+        <div class="mt-6 overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="min-w-[1100px] w-full border-collapse text-left text-sm">
+                <thead class="bg-primary text-white">
+                    <tr>
+                        <th class="px-4 py-4 font-semibold">Type</th>
+                        <th class="px-4 py-4 font-semibold">Période</th>
+                        <th class="px-4 py-4 font-semibold">Date limite</th>
+                        <th class="px-4 py-4 font-semibold">Prix</th>
+                        <th class="px-4 py-4 font-semibold">Ancien index</th>
+                        <th class="px-4 py-4 font-semibold">Nouveau index</th>
+                        <th class="px-4 py-4 font-semibold">Consommation</th>
+                        <th class="px-4 py-4 font-semibold">Statut</th>
+                        <th class="px-4 py-4 font-semibold">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 bg-white">
+                    {% for bill in bills %}
+                    <tr class="odd:bg-white even:bg-slate-50 transition hover:bg-blue-50/40">
+                        <td class="px-4 py-4">
+                            {% if bill.type == 'SONABEL' %}
+                            <span
+                                class="inline-flex rounded-full bg-secondary/10 px-3 py-1 text-xs font-semibold text-secondary">SONABEL</span>
+                            {% else %}
+                            <span
+                                class="inline-flex rounded-full bg-teal-100 px-3 py-1 text-xs font-semibold text-teal-700">ONEA</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-4 text-textPrimary">{{ bill.period|date:"m/Y" }}</td>
+                        <td class="px-4 py-4 text-textPrimary">{{ bill.deadline|date:"d/m/Y" }}</td>
+                        <td class="px-4 py-4 font-semibold text-primary">{{ bill.price_total }} FCFA</td>
+                        <td class="px-4 py-4 text-textPrimary">{{ bill.previous_index }}</td>
+                        <td class="px-4 py-4 text-textPrimary">{{ bill.new_index }}</td>
+                        <td class="px-4 py-4 text-textPrimary">{{ bill.total_consumption }}</td>
+                        <td class="px-4 py-4">
+                            <span
+                                class="inline-flex rounded-full px-3 py-1 text-xs font-semibold {% if bill.paid %}bg-success/10 text-success{% else %}bg-danger/10 text-danger{% endif %}">
+                                {% if bill.paid %}Payée{% else %}Impayée{% endif %}
+                            </span>
+                        </td>
+                        <td class="px-4 py-4">
+                            <form method="post" action="{% url 'toggle_bill' bill.id %}">
+                                {% csrf_token %}
+                                {% if bill.paid %}
+                                <button type="submit"
+                                    class="rounded-xl border border-danger px-4 py-2 text-xs font-semibold text-danger transition hover:bg-danger hover:text-white">
                                     Marquer comme impayée
                                 </button>
-                            {% else %}
-                                <button type="submit" class="rounded-xl border border-success px-4 py-2 text-xs font-semibold text-success transition hover:bg-success hover:text-white">
+                                {% else %}
+                                <button type="submit"
+                                    class="rounded-xl border border-success px-4 py-2 text-xs font-semibold text-success transition hover:bg-success hover:text-white">
                                     Marquer comme payée
                                 </button>
-                            {% endif %}
-                        </form>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="9" class="px-4 py-10 text-center text-textSecondary">Aucune facture enregistrée.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                                {% endif %}
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="px-4 py-10 text-center text-textSecondary">Aucune facture enregistrée.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
-{% endblock %}
+    {% endblock %}
