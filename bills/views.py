@@ -97,10 +97,10 @@ def home_view(request):
         'sonabel_consumption_percentage': sonabel_consumption_percentage,
         'sonabel_price_percentage': sonabel_price_percentage,
 
-        'average_onea_consumption': average_onea_consumption,
-        'average_onea_price': average_onea_price,
-        'onea_consumption_percentage': onea_consumption_percentage,
-        'onea_price_percentage': onea_price_percentage,
+        'average_onea_consumption': round(average_onea_consumption),
+        'average_onea_price': round(average_onea_price),
+        'onea_consumption_percentage': round(onea_consumption_percentage),
+        'onea_price_percentage': round(onea_price_percentage),
         # 'sonabal_consumption': sonabal_consumption,
         # 'sonabel_bills_period': sonabel_bills_period,
 
