@@ -38,6 +38,32 @@
             </div>
         </div>
     </section>
+    <div class="mb-6 flex flex-col gap-3 rounded-3xl bg-white p-4 shadow-soft ring-1 ring-slate-200 sm:flex-row sm:items-center sm:justify-between">
+        <form method="get" class="flex items-center gap-3">
+            <label for="year-filter" class="text-sm font-semibold text-primary">Filtrer par année</label>
+            <select id="year-filter" name="year" onchange="this.form.submit()"
+                class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm text-textPrimary outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+                <option value="">Toutes les années</option>
+                {% for year in available_years %}
+                <option value="{{ year.year }}" {% if selected_year == year.year|stringformat:"s" %}selected{% endif %}>
+                    {{ year.year }}
+                </option>
+                {% endfor %}
+            </select>
+        </form>
+
+        {% if selected_year %}
+        <div class="flex items-center gap-3">
+            <span class="inline-flex items-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white shadow-soft">
+                Filtré: {{ selected_year }}
+            </span>
+            <a href="{% url 'home' %}"
+                class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-primary transition hover:border-primary hover:text-primary">
+                Réinitialiser
+            </a>
+        </div>
+        {% endif %}
+    </div>
     <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <article class="rounded-3xl bg-white p-6 shadow-soft ring-1 ring-slate-200">
             <p class="text-sm font-medium text-textSecondary">Total des factures</p>

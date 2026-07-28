@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db.models import Sum
+from django.core.paginator import Paginator
+from django.db.models import Q, Sum
 
 from .forms import BillForm
 from .models import Bill
@@ -15,15 +16,21 @@ def login_view(request):
 
 @login_required
 def home_view(request):
+    selected_year = request.GET.get('year', None)
+    available_years = list(Bill.objects.dates('period', 'year', order='DESC'))
+
     bills = Bill.objects.all()
-    all_bills_price = Bill.objects.aggregate(Sum('price_total'))['price_total__sum'] or 0
-    unpaid_bills = Bill.objects.filter(paid=False).all()
+    if selected_year:
+        bills = bills.filter(period__year=selected_year)
+
+    all_bills_price = bills.aggregate(Sum('price_total'))['price_total__sum'] or 0
+    unpaid_bills = bills.filter(paid=False).all()
     unpaid_bills_price = unpaid_bills.aggregate(Sum('price_total'))['price_total__sum'] or 0
 
     sonabel_bills_descending = bills.filter(type='SONABEL').order_by('-period')[:5]
     sonabel_bills = bills.filter(type='SONABEL').order_by('period')
 
-    all_sonabel_bills_price = Bill.objects.filter(type="SONABEL").aggregate(Sum('price_total'))['price_total__sum'] or 0
+    all_sonabel_bills_price = bills.filter(type="SONABEL").aggregate(Sum('price_total'))['price_total__sum'] or 0
 
     sonabal_consumption = sonabel_bills.values_list('total_consumption', flat=True)
     sonabel_bills_period = sonabel_bills.values_list('period', flat=True)
@@ -55,7 +62,7 @@ def home_view(request):
     onea_bills_descending = bills.filter(type='ONEA').order_by('-period')[:5]
     onea_bills = bills.filter(type='ONEA').order_by('period')
 
-    all_onea_bills_price = Bill.objects.filter(type="ONEA").aggregate(Sum('price_total'))['price_total__sum'] or 0
+    all_onea_bills_price = bills.filter(type="ONEA").aggregate(Sum('price_total'))['price_total__sum'] or 0
 
     onea_consumption = onea_bills.values_list('total_consumption', flat=True)
     onea_bills_period = onea_bills.values_list('period', flat=True)
@@ -110,6 +117,8 @@ def home_view(request):
 
         'periods_2': periods_2,
         'consumptions_2': consumptions_2,
+        'selected_year': selected_year,
+        'available_years': available_years,
     }
     return render(request, 'bill/index.html', context)
 
@@ -158,10 +167,49 @@ def delete_bill(request, id):
 @login_required
 def bills_list(request):
     type_filter = request.GET.get('type')
+    q = request.GET.get('q', '')
+    sort_param = request.GET.get('sort', '-period')
+    order = request.GET.get('order', 'desc')
+
+    allowed_sort_fields = {'period', 'deadline', 'price_total', 'total_consumption', 'paid'}
+    sort_field = sort_param.lstrip('-')
+    if sort_field not in allowed_sort_fields:
+        sort_field = 'period'
+
+    if order not in {'asc', 'desc'}:
+        order = 'desc' if sort_param.startswith('-') else 'asc'
+
+    order_prefix = '-' if order == 'desc' else ''
+
     bills = Bill.objects.all()
     if type_filter in ['SONABEL', 'ONEA']:
         bills = bills.filter(type=type_filter)
-    return render(request, 'bill/bills_list.html', {'bills': bills, 'active_filter': type_filter})
+
+    if q:
+        bills = bills.filter(
+            Q(period__icontains=q) |
+            Q(type__icontains=q) |
+            Q(price_total__icontains=q)
+        )
+
+    bills = bills.order_by(f'{order_prefix}{sort_field}')
+
+    paginator = Paginator(bills, 15)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
+    return render(
+        request,
+        'bill/bills_list.html',
+        {
+            'bills': page_obj,
+            'page_obj': page_obj,
+            'active_filter': type_filter,
+            'q': q,
+            'current_sort': sort_field,
+            'current_order': order,
+        }
+    )
 
 
 @login_required

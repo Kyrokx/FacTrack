@@ -11,51 +11,166 @@
             <p class="mt-2 text-sm text-textSecondary">Suivez le statut, les montants et les consommations de chaque
                 facture.</p>
         </div>
-        <div class="flex gap-2 mt-4">
-            <a href="{% url 'bills_list' %}"
-                class="px-4 py-2 rounded-xl text-sm font-semibold transition duration-200
-              {% if not active_filter %}bg-primary text-white{% else %}border border-slate-300 text-textSecondary hover:bg-slate-100{% endif %}">
-                Toutes
-            </a>
-            <a href="{% url 'bills_list' %}?type=SONABEL"
-                class="px-4 py-2 rounded-xl text-sm font-semibold transition duration-200
-              {% if active_filter == 'SONABEL' %}bg-secondary text-white{% else %}border border-slate-300 text-textSecondary hover:bg-slate-100{% endif %}">
-                <span class="flex items-center gap-2">
-                    <i data-lucide="zap" class="w-4 h-4 text-yellow-500"></i>
-                    <span>SONABEL</span>
-                </span> </a>
-            <a href="{% url 'bills_list' %}?type=ONEA"
-                class="px-4 py-2 rounded-xl text-sm font-semibold transition duration-200
-              {% if active_filter == 'ONEA' %}bg-teal-600 text-white{% else %}border border-slate-300 text-textSecondary hover:bg-slate-100{% endif %}">
-                <span class="flex items-center gap-2">
-                    <i data-lucide="droplets" class="w-4 h-4 text-cyan-500""></i>
-                            <span>ONEA</span>
-                        </span>    </a>
-</div>
+        <div class="mt-6 flex flex-col gap-4">
+            <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <form method="get" action="{% url 'bills_list' %}" class="w-full max-w-md">
+                    {% if active_filter %}<input type="hidden" name="type" value="{{ active_filter }}">{% endif %}
+                    {% if current_sort %}<input type="hidden" name="sort" value="{{ current_sort }}">{% endif %}
+                    {% if current_order %}<input type="hidden" name="order" value="{{ current_order }}">{% endif %}
+                    <div class="flex flex-col gap-2 sm:flex-row">
+                        <div class="relative flex-1">
+                            <i data-lucide="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-textSecondary"></i>
+                            <input
+                                type="text"
+                                name="q"
+                                value="{{ q }}"
+                                placeholder="Rechercher par type, période, montant..."
+                                class="w-full rounded-xl border border-slate-300 bg-white py-3 pl-10 pr-4 text-sm text-textPrimary outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10"
+                            >
+                        </div>
+                        <div class="flex gap-2">
+                            <button type="submit"
+                                class="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white transition hover:bg-secondary">
+                                <i data-lucide="search" class="mr-2 h-4 w-4"></i>
+                                Rechercher
+                            </button>
+                            {% if q %}
+                            <a href="{% url 'bills_list' %}?{% if active_filter %}type={{ active_filter }}&{% endif %}sort={{ current_sort }}&order={{ current_order }}"
+                                class="inline-flex items-center justify-center rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-textSecondary transition hover:bg-slate-100">
+                                ×
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </form>
 
-        <a href=" {% url 'add_bills' %}"
-                        class="inline-flex items-center justify-center rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:shadow-soft">
+                <a href="{% url 'add_bills' %}"
+                    class="inline-flex items-center justify-center rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:shadow-soft">
+                    <span class="flex items-center gap-2">
+                        <i data-lucide="plus-circle"></i>
+                        <span>Ajouter une facture</span>
+                    </span>
+                </a>
+            </div>
+
+            <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div class="flex flex-wrap gap-2">
+                    <a href="{% url 'bills_list' %}?{% if q %}q={{ q|urlencode }}&{% endif %}sort={{ current_sort }}&order={{ current_order }}"
+                        class="px-4 py-2 rounded-xl text-sm font-semibold transition duration-200
+                      {% if not active_filter %}bg-primary text-white{% else %}border border-slate-300 text-textSecondary hover:bg-slate-100{% endif %}">
+                        Toutes
+                    </a>
+                    <a href="{% url 'bills_list' %}?{% if q %}q={{ q|urlencode }}&{% endif %}type=SONABEL&sort={{ current_sort }}&order={{ current_order }}"
+                        class="px-4 py-2 rounded-xl text-sm font-semibold transition duration-200
+                      {% if active_filter == 'SONABEL' %}bg-secondary text-white{% else %}border border-slate-300 text-textSecondary hover:bg-slate-100{% endif %}">
                         <span class="flex items-center gap-2">
-
-                            <i data-lucide="plus-circle"></i>
-                            <span>Ajouter une facture</span>
+                            <i data-lucide="zap" class="w-4 h-4 text-yellow-500"></i>
+                            <span>SONABEL</span>
                         </span>
-            </a>
+                    </a>
+                    <a href="{% url 'bills_list' %}?{% if q %}q={{ q|urlencode }}&{% endif %}type=ONEA&sort={{ current_sort }}&order={{ current_order }}"
+                        class="px-4 py-2 rounded-xl text-sm font-semibold transition duration-200
+                      {% if active_filter == 'ONEA' %}bg-teal-600 text-white{% else %}border border-slate-300 text-textSecondary hover:bg-slate-100{% endif %}">
+                        <span class="flex items-center gap-2">
+                            <i data-lucide="droplets" class="w-4 h-4 text-cyan-500"></i>
+                            <span>ONEA</span>
+                        </span>
+                    </a>
+                </div>
 
+                {% if q %}
+                <div class="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">
+                    <i data-lucide="filter" class="h-4 w-4"></i>
+                    <span>Recherche active: "{{ q }}"</span>
+                </div>
+                {% endif %}
+            </div>
         </div>
+
+    </div>
 
         <div class="mt-6 overflow-x-auto rounded-2xl border border-slate-200">
             <table class="min-w-[1100px] w-full border-collapse text-left text-sm">
                 <thead class="bg-primary text-white">
                     <tr>
                         <th class="px-4 py-4 font-semibold">Type</th>
-                        <th class="px-4 py-4 font-semibold">Période</th>
-                        <th class="px-4 py-4 font-semibold">Date limite</th>
-                        <th class="px-4 py-4 font-semibold">Prix</th>
+                        <th class="px-4 py-4 font-semibold">
+                            <a href="{% url 'bills_list' %}?{% if q %}q={{ q|urlencode }}&{% endif %}{% if active_filter %}type={{ active_filter }}&{% endif %}sort=period&order={% if current_sort == 'period' and current_order == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="inline-flex items-center gap-2 rounded-lg px-3 py-2 transition {% if current_sort == 'period' %}bg-white/10{% else %}hover:bg-white/10{% endif %}">
+                                <span>Période</span>
+                                {% if current_sort == 'period' %}
+                                    {% if current_order == 'asc' %}
+                                    <i data-lucide="chevron-up" class="h-4 w-4"></i>
+                                    {% else %}
+                                    <i data-lucide="chevron-down" class="h-4 w-4"></i>
+                                    {% endif %}
+                                {% else %}
+                                <i data-lucide="chevrons-up-down" class="h-4 w-4"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th class="px-4 py-4 font-semibold">
+                            <a href="{% url 'bills_list' %}?{% if q %}q={{ q|urlencode }}&{% endif %}{% if active_filter %}type={{ active_filter }}&{% endif %}sort=deadline&order={% if current_sort == 'deadline' and current_order == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="inline-flex items-center gap-2 rounded-lg px-3 py-2 transition {% if current_sort == 'deadline' %}bg-white/10{% else %}hover:bg-white/10{% endif %}">
+                                <span>Date limite</span>
+                                {% if current_sort == 'deadline' %}
+                                    {% if current_order == 'asc' %}
+                                    <i data-lucide="chevron-up" class="h-4 w-4"></i>
+                                    {% else %}
+                                    <i data-lucide="chevron-down" class="h-4 w-4"></i>
+                                    {% endif %}
+                                {% else %}
+                                <i data-lucide="chevrons-up-down" class="h-4 w-4"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th class="px-4 py-4 font-semibold">
+                            <a href="{% url 'bills_list' %}?{% if q %}q={{ q|urlencode }}&{% endif %}{% if active_filter %}type={{ active_filter }}&{% endif %}sort=price_total&order={% if current_sort == 'price_total' and current_order == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="inline-flex items-center gap-2 rounded-lg px-3 py-2 transition {% if current_sort == 'price_total' %}bg-white/10{% else %}hover:bg-white/10{% endif %}">
+                                <span>Prix</span>
+                                {% if current_sort == 'price_total' %}
+                                    {% if current_order == 'asc' %}
+                                    <i data-lucide="chevron-up" class="h-4 w-4"></i>
+                                    {% else %}
+                                    <i data-lucide="chevron-down" class="h-4 w-4"></i>
+                                    {% endif %}
+                                {% else %}
+                                <i data-lucide="chevrons-up-down" class="h-4 w-4"></i>
+                                {% endif %}
+                            </a>
+                        </th>
                         <th class="px-4 py-4 font-semibold">Ancien index</th>
                         <th class="px-4 py-4 font-semibold">Nouveau index</th>
-                        <th class="px-4 py-4 font-semibold">Consommation</th>
-                        <th class="px-4 py-4 font-semibold">Statut</th>
+                        <th class="px-4 py-4 font-semibold">
+                            <a href="{% url 'bills_list' %}?{% if q %}q={{ q|urlencode }}&{% endif %}{% if active_filter %}type={{ active_filter }}&{% endif %}sort=total_consumption&order={% if current_sort == 'total_consumption' and current_order == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="inline-flex items-center gap-2 rounded-lg px-3 py-2 transition {% if current_sort == 'total_consumption' %}bg-white/10{% else %}hover:bg-white/10{% endif %}">
+                                <span>Consommation</span>
+                                {% if current_sort == 'total_consumption' %}
+                                    {% if current_order == 'asc' %}
+                                    <i data-lucide="chevron-up" class="h-4 w-4"></i>
+                                    {% else %}
+                                    <i data-lucide="chevron-down" class="h-4 w-4"></i>
+                                    {% endif %}
+                                {% else %}
+                                <i data-lucide="chevrons-up-down" class="h-4 w-4"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th class="px-4 py-4 font-semibold">
+                            <a href="{% url 'bills_list' %}?{% if q %}q={{ q|urlencode }}&{% endif %}{% if active_filter %}type={{ active_filter }}&{% endif %}sort=paid&order={% if current_sort == 'paid' and current_order == 'asc' %}desc{% else %}asc{% endif %}"
+                                class="inline-flex items-center gap-2 rounded-lg px-3 py-2 transition {% if current_sort == 'paid' %}bg-white/10{% else %}hover:bg-white/10{% endif %}">
+                                <span>Statut</span>
+                                {% if current_sort == 'paid' %}
+                                    {% if current_order == 'asc' %}
+                                    <i data-lucide="chevron-up" class="h-4 w-4"></i>
+                                    {% else %}
+                                    <i data-lucide="chevron-down" class="h-4 w-4"></i>
+                                    {% endif %}
+                                {% else %}
+                                <i data-lucide="chevrons-up-down" class="h-4 w-4"></i>
+                                {% endif %}
+                            </a>
+                        </th>
                         <th class="px-4 py-4 font-semibold">Action</th> 
                     </tr>
                 </thead>
@@ -125,13 +240,63 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="9" class="px-4 py-10 text-center text-textSecondary">Aucune facture enregistrée.
+                        <td colspan="9" class="px-4 py-10 text-center text-textSecondary">
+                            {% if q %}
+                            <div class="space-y-3">
+                                <p class="text-sm font-semibold text-primary">Aucune facture trouvée pour "{{ q }}"</p>
+                                <a href="{% url 'bills_list' %}?{% if active_filter %}type={{ active_filter }}&{% endif %}sort={{ current_sort }}&order={{ current_order }}"
+                                    class="inline-flex items-center justify-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-textSecondary transition hover:bg-slate-100">
+                                    Réinitialiser
+                                </a>
+                            </div>
+                            {% else %}
+                            Aucune facture enregistrée.
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+
+        {% if page_obj.paginator.num_pages > 1 %}
+        <div class="mt-6 flex flex-col items-center justify-between gap-4 sm:flex-row">
+            <p class="text-sm text-textSecondary">
+                Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
+            </p>
+
+            <div class="flex flex-wrap items-center justify-center gap-2">
+                {% if page_obj.has_previous %}
+                <a href="{% url 'bills_list' %}?{% if q %}q={{ q|urlencode }}&{% endif %}{% if active_filter %}type={{ active_filter }}&{% endif %}sort={{ current_sort }}&order={{ current_order }}&page={{ page_obj.previous_page_number }}"
+                    class="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-textSecondary transition hover:bg-slate-100">
+                    <i data-lucide="chevron-left" class="h-4 w-4"></i>
+                    Précédent
+                </a>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                {% if num == page_obj.number %}
+                <span class="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white shadow-soft">
+                    {{ num }}
+                </span>
+                {% else %}
+                <a href="{% url 'bills_list' %}?{% if q %}q={{ q|urlencode }}&{% endif %}{% if active_filter %}type={{ active_filter }}&{% endif %}sort={{ current_sort }}&order={{ current_order }}&page={{ num }}"
+                    class="inline-flex items-center justify-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-textSecondary transition hover:bg-slate-100">
+                    {{ num }}
+                </a>
+                {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <a href="{% url 'bills_list' %}?{% if q %}q={{ q|urlencode }}&{% endif %}{% if active_filter %}type={{ active_filter }}&{% endif %}sort={{ current_sort }}&order={{ current_order }}&page={{ page_obj.next_page_number }}"
+                    class="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-textSecondary transition hover:bg-slate-100">
+                    Suivant
+                    <i data-lucide="chevron-right" class="h-4 w-4"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
 
         <div id="delete-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 px-4">
             <div class="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl ring-1 ring-slate-200">
