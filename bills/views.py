@@ -1,14 +1,18 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Bill
+from django.contrib import messages
 from django.db.models import Sum
+
 from .forms import BillForm
+from .models import Bill
 
 
 # Create your views here.
 
 def login_view(request):
     return render(request, 'registration/login.html')
+
+
 @login_required
 def home_view(request):
     bills = Bill.objects.all()
@@ -48,7 +52,6 @@ def home_view(request):
     periods_1 = [d.strftime("%m/%Y") for d in sonabel_bills_period]
     consumptions_1 = sonabel_consumptions_list
 
-
     onea_bills_descending = bills.filter(type='ONEA').order_by('-period')[:5]
     onea_bills = bills.filter(type='ONEA').order_by('period')
 
@@ -58,7 +61,7 @@ def home_view(request):
     onea_bills_period = onea_bills.values_list('period', flat=True)
     average_onea_consumption = sum(onea_consumption) / len(onea_consumption) if onea_consumption else 0
     average_onea_price = sum(bill.price_total for bill in onea_bills) / len(onea_bills) if onea_bills else 0
- # percentage onea consumption compared to the previous month
+    # percentage onea consumption compared to the previous month
     onea_consumptions_list = list(sonabal_consumption)
     onea_consumption_percentage = 0
     if len(onea_consumptions_list) >= 2:
@@ -76,9 +79,9 @@ def home_view(request):
         last_price = onea_prices_list[-1]
         prev_price = onea_prices_list[-2]
         if prev_price:
-            onea_price_percentage = ((last_price - prev_price) / prev_price) * 100    
+            onea_price_percentage = ((last_price - prev_price) / prev_price) * 100
     periods_2 = [d.strftime("%m/%Y") for d in onea_bills_period]
-    consumptions_2 = list(onea_consumption)    
+    consumptions_2 = list(onea_consumption)
 
     context = {
         'bills': bills,
@@ -101,16 +104,15 @@ def home_view(request):
         'average_onea_price': round(average_onea_price),
         'onea_consumption_percentage': round(onea_consumption_percentage),
         'onea_price_percentage': round(onea_price_percentage),
-        # 'sonabal_consumption': sonabal_consumption,
-        # 'sonabel_bills_period': sonabel_bills_period,
 
         'periods_1': periods_1,
-        'consumptions_1': consumptions_1,   
+        'consumptions_1': consumptions_1,
 
         'periods_2': periods_2,
-        'consumptions_2': consumptions_2,  
+        'consumptions_2': consumptions_2,
     }
     return render(request, 'bill/index.html', context)
+
 
 @login_required
 def add_bills(request):
@@ -118,22 +120,54 @@ def add_bills(request):
         form = BillForm(request.POST)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Facture ajoutée avec succès !')
             return redirect('home')
     else:
         form = BillForm()
     return render(request, 'bill/add_bills.html', {'form': form})
 
+
+@login_required
+def edit_bill(request, id):
+    bill = get_object_or_404(Bill, id=id)
+
+    if request.method == 'POST':
+        form = BillForm(request.POST, instance=bill)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Facture modifiée avec succès !')
+            return redirect('bills_list')
+    else:
+        form = BillForm(instance=bill)
+
+    return render(request, 'bill/edit_bill.html', {'form': form, 'bill': bill})
+
+
+@login_required
+def delete_bill(request, id):
+    bill = get_object_or_404(Bill, id=id)
+
+    if request.method != 'POST':
+        return redirect('bills_list')
+
+    bill.delete()
+    messages.success(request, 'Facture supprimée avec succès !')
+    return redirect('bills_list')
+
+
 @login_required
 def bills_list(request):
-    type_filter = request.GET.get('type')  # récupère ?type=SONABEL ou ?type=ONEA
+    type_filter = request.GET.get('type')
     bills = Bill.objects.all()
     if type_filter in ['SONABEL', 'ONEA']:
         bills = bills.filter(type=type_filter)
     return render(request, 'bill/bills_list.html', {'bills': bills, 'active_filter': type_filter})
 
+
 @login_required
 def toggle_bill(request, id):
     bill = Bill.objects.get(id=id)
-    bill.paid = not bill.paid  # ← Bascule True/False
+    bill.paid = not bill.paid
     bill.save()
+    messages.success(request, 'Statut de la facture mis à jour !')
     return redirect('bills_list')

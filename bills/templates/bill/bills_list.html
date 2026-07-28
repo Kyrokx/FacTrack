@@ -56,7 +56,7 @@
                         <th class="px-4 py-4 font-semibold">Nouveau index</th>
                         <th class="px-4 py-4 font-semibold">Consommation</th>
                         <th class="px-4 py-4 font-semibold">Statut</th>
-                        <th class="px-4 py-4 font-semibold">Action</th>
+                        <th class="px-4 py-4 font-semibold">Action</th> 
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200 bg-white">
@@ -73,10 +73,14 @@
                         </td>
                         <td class="px-4 py-4 text-textPrimary">{{ bill.period|date:"m/Y" }}</td>
                         <td class="px-4 py-4 text-textPrimary">{{ bill.deadline|date:"d/m/Y" }}</td>
-                        <td class="px-4 py-4 font-semibold text-primary">{{ bill.price_total }} FCFA</td>
+                        <td class="px-4 py-4 font-semibold text-primary">{{ bill.price_total }} FCFA</td>                        
                         <td class="px-4 py-4 text-textPrimary">{{ bill.previous_index }}</td>
                         <td class="px-4 py-4 text-textPrimary">{{ bill.new_index }}</td>
-                        <td class="px-4 py-4 text-textPrimary">{{ bill.total_consumption }}</td>
+                        {% if bill.type == "SONABEL" %}
+                        <td class="px-4 py-4 text-textPrimary">{{ bill.total_consumption }} kWh</td>
+                        {% else %}
+                        <td class="px-4 py-4 text-textPrimary">{{ bill.total_consumption }} m³</td>
+                        {% endif %}
                         <td class="px-4 py-4">
                             <span
                                 class="inline-flex rounded-full px-3 py-1 text-xs font-semibold {% if bill.paid %}bg-success/10 text-success{% else %}bg-danger/10 text-danger{% endif %}">
@@ -84,20 +88,39 @@
                             </span>
                         </td>
                         <td class="px-4 py-4">
-                            <form method="post" action="{% url 'toggle_bill' bill.id %}">
-                                {% csrf_token %}
-                                {% if bill.paid %}
-                                <button type="submit"
-                                    class="rounded-xl border border-danger px-4 py-2 text-xs font-semibold text-danger transition hover:bg-danger hover:text-white">
-                                    Marquer comme impayée
+                            <div class="flex flex-wrap gap-2">
+                                <a href="{% url 'edit_bill' bill.id %}"
+                                    class="inline-flex items-center justify-center rounded-xl border border-blue-500 px-4 py-2 text-xs font-semibold text-blue-600 transition hover:bg-blue-500 hover:text-white">
+                                    <i data-lucide="pencil" class="mr-1 h-4 w-4"></i>
+                                    Modifier
+                                </a>
+
+                                <form id="delete-form-{{ bill.id }}" method="post" action="{% url 'delete_bill' bill.id %}" class="inline">
+                                    {% csrf_token %}
+                                </form>
+
+                                <button type="button"
+                                    onclick="openDeleteModal('delete-form-{{ bill.id }}')"
+                                    class="inline-flex items-center justify-center rounded-xl border border-danger px-4 py-2 text-xs font-semibold text-danger transition hover:bg-danger hover:text-white">
+                                    <i data-lucide="trash-2" class="mr-1 h-4 w-4"></i>
+                                    Supprimer
                                 </button>
-                                {% else %}
-                                <button type="submit"
-                                    class="rounded-xl border border-success px-4 py-2 text-xs font-semibold text-success transition hover:bg-success hover:text-white">
-                                    Marquer comme payée
-                                </button>
-                                {% endif %}
-                            </form>
+
+                                <form method="post" action="{% url 'toggle_bill' bill.id %}">
+                                    {% csrf_token %}
+                                    {% if bill.paid %}
+                                    <button type="submit"
+                                        class="rounded-xl border border-danger px-4 py-2 text-xs font-semibold text-danger transition hover:bg-danger hover:text-white">
+                                        Marquer comme impayée
+                                    </button>
+                                    {% else %}
+                                    <button type="submit"
+                                        class="rounded-xl border border-success px-4 py-2 text-xs font-semibold text-success transition hover:bg-success hover:text-white">
+                                        Marquer comme payée
+                                    </button>
+                                    {% endif %}
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     {% empty %}
@@ -109,5 +132,75 @@
                 </tbody>
             </table>
         </div>
+
+        <div id="delete-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 px-4">
+            <div class="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl ring-1 ring-slate-200">
+                <div class="flex items-start gap-3">
+                    <div class="flex h-11 w-11 items-center justify-center rounded-full bg-danger/10 text-danger">
+                        <i data-lucide="trash-2" class="h-5 w-5"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h2 class="text-lg font-bold text-primary">Supprimer la facture</h2>
+                        <p class="mt-2 text-sm text-textSecondary">Êtes-vous sûr de vouloir supprimer cette facture ?</p>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end gap-3">
+                    <button type="button"
+                        onclick="closeDeleteModal()"
+                        class="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-textSecondary transition hover:bg-slate-100">
+                        Annuler
+                    </button>
+                    <button type="button"
+                        onclick="confirmDelete()"
+                        class="rounded-xl bg-danger px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90">
+                        Supprimer
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
+    {% endblock %}
+
+    {% block scripts %}
+    <script>
+        let deleteFormId = null;
+
+        function openDeleteModal(formId) {
+            deleteFormId = formId;
+            const modal = document.getElementById('delete-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+
+        function closeDeleteModal() {
+            deleteFormId = null;
+            const modal = document.getElementById('delete-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function confirmDelete() {
+            if (!deleteFormId) return;
+            const form = document.getElementById(deleteFormId);
+            if (form) form.submit();
+        }
+
+        document.addEventListener('click', function (event) {
+            const modal = document.getElementById('delete-modal');
+            if (modal && event.target === modal) {
+                closeDeleteModal();
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeDeleteModal();
+            }
+        });
+    </script>
     {% endblock %}
