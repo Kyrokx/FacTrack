@@ -44,6 +44,23 @@
                     </div>
                 </form>
 
+                <div class="flex flex-col gap-2 sm:flex-row">
+                    <a href="{% url 'export_csv' %}?{% if active_filter %}type={{ active_filter }}{% endif %}{% if request.GET.year %}{% if active_filter %}&{% endif %}year={{ request.GET.year }}{% endif %}"
+                        class="inline-flex items-center justify-center rounded-xl border border-success px-5 py-3 text-sm font-semibold text-success transition duration-200 hover:bg-success hover:text-white">
+                        <span class="flex items-center gap-2">
+                            <i data-lucide="file-spreadsheet"></i>
+                            <span>Exporter CSV</span>
+                        </span>
+                    </a>
+                    <a href="{% url 'export_pdf' %}?{% if active_filter %}type={{ active_filter }}{% endif %}{% if request.GET.year %}{% if active_filter %}&{% endif %}year={{ request.GET.year }}{% endif %}"
+                        class="inline-flex items-center justify-center rounded-xl border border-danger px-5 py-3 text-sm font-semibold text-danger transition duration-200 hover:bg-danger hover:text-white">
+                        <span class="flex items-center gap-2">
+                            <i data-lucide="file-text"></i>
+                            <span>Exporter PDF</span>
+                        </span>
+                    </a>
+                </div>
+
                 <a href="{% url 'add_bills' %}"
                     class="inline-flex items-center justify-center rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:shadow-soft">
                     <span class="flex items-center gap-2">

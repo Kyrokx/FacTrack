@@ -2,9 +2,6 @@
 
 {% block title %}Dashboard - FacTrack{% endblock %}
 
-{% block head %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-{% endblock %}
 
 {% block content %}
 <div class="space-y-8">
@@ -123,7 +120,46 @@
             </div>
         </article>
     </section>
-            <div class="sm:col-span-2 xl:col-span-3 border-t border-slate-200 my-4"><p class="text-sm font-large text-textSecondary text-center">5 dernieres factures</p></div>
+
+    <section class="grid gap-6 xl:grid-cols-2">
+        <article class="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-slate-200 sm:p-6">
+            <div class="flex items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-primary">Dépenses par mois</h2>
+                    <p class="text-sm text-textSecondary">Comparaison des montants SONABEL et ONEA par période.</p>
+                </div>
+            </div>
+            <div class="mt-5 h-80 w-full">
+                <canvas id="priceChart" class="h-full w-full"></canvas>
+            </div>
+        </article>
+
+        <article class="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-slate-200 sm:p-6">
+            <div class="flex items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-primary">Statut des factures</h2>
+                    <p class="text-sm text-textSecondary">Répartition des factures payées et impayées.</p>
+                </div>
+            </div>
+            <div class="relative mt-5 h-80 w-full">
+                <canvas id="statusChart" class="h-full w-full"></canvas>
+            </div>
+        </article>
+    </section>
+
+    <section class="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-slate-200 sm:p-6">
+        <div class="flex items-center justify-between gap-4">
+            <div>
+                <h2 class="text-lg font-semibold text-primary">Comparaison {{ current_year }} vs {{ previous_year }}</h2>
+                <p class="text-sm text-textSecondary">Evolution mensuelle des dépenses sur deux années successives.</p>
+            </div>
+        </div>
+        <div class="mt-5 h-96 w-full">
+            <canvas id="yearComparisonChart" class="h-full w-full"></canvas>
+        </div>
+    </section>
+
+    <div class="sm:col-span-2 xl:col-span-3 border-t border-slate-200 my-4"><p class="text-sm font-large text-textSecondary text-center">5 dernieres factures</p></div>
 
     <section class="grid gap-6 xl:grid-cols-2">
 
@@ -206,44 +242,6 @@
                 {% endfor %}
             </div>
         </article>
-    </section>
-
-    <section class="grid gap-6 xl:grid-cols-2">
-        <article class="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-slate-200 sm:p-6">
-            <div class="flex items-center justify-between gap-4">
-                <div>
-                    <h2 class="text-lg font-semibold text-primary">Dépenses par mois</h2>
-                    <p class="text-sm text-textSecondary">Comparaison des montants SONABEL et ONEA par période.</p>
-                </div>
-            </div>
-            <div class="mt-5 h-80 w-full">
-                <canvas id="priceChart" class="h-full w-full"></canvas>
-            </div>
-        </article>
-
-        <article class="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-slate-200 sm:p-6">
-            <div class="flex items-center justify-between gap-4">
-                <div>
-                    <h2 class="text-lg font-semibold text-primary">Statut des factures</h2>
-                    <p class="text-sm text-textSecondary">Répartition des factures payées et impayées.</p>
-                </div>
-            </div>
-            <div class="relative mt-5 h-80 w-full">
-                <canvas id="statusChart" class="h-full w-full"></canvas>
-            </div>
-        </article>
-    </section>
-
-    <section class="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-slate-200 sm:p-6">
-        <div class="flex items-center justify-between gap-4">
-            <div>
-                <h2 class="text-lg font-semibold text-primary">Comparaison {{ current_year }} vs {{ previous_year }}</h2>
-                <p class="text-sm text-textSecondary">Evolution mensuelle des dépenses sur deux années successives.</p>
-            </div>
-        </div>
-        <div class="mt-5 h-96 w-full">
-            <canvas id="yearComparisonChart" class="h-full w-full"></canvas>
-        </div>
     </section>
 </div>
 {% endblock %}
@@ -558,5 +556,6 @@
             }
         });
     }
-</script>
+
+</script>   
 {% endblock %}

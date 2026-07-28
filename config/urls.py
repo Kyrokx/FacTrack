@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.contrib.auth import views as auth_views
-from bills.views import home_view,add_bills,bills_list,toggle_bill,edit_bill,delete_bill
+from bills.views import home_view,add_bills,bills_list,toggle_bill,edit_bill,delete_bill,export_bills_csv,export_bills_pdf
 
 
 urlpatterns = [
@@ -26,6 +26,8 @@ urlpatterns = [
     path('', home_view, name='home'),
     path('add/', add_bills, name='add_bills'),
     path('bills/', bills_list, name='bills_list'),
+    path('export/csv/', export_bills_csv, name='export_csv'),
+    path('export/pdf/', export_bills_pdf, name='export_pdf'),
     path('edit/<int:id>/', edit_bill, name='edit_bill'),
     path('delete/<int:id>/', delete_bill, name='delete_bill'),
     path('toggle/<int:id>/', toggle_bill, name='toggle_bill'),
