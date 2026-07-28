@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q, Sum
+import datetime
 
 from .forms import BillForm
 from .models import Bill
@@ -90,6 +91,31 @@ def home_view(request):
     periods_2 = [d.strftime("%m/%Y") for d in onea_bills_period]
     consumptions_2 = list(onea_consumption)
 
+    sonabel_price_rows = bills.filter(type='SONABEL').values('period').annotate(total=Sum('price_total')).order_by('period')
+    onea_price_rows = bills.filter(type='ONEA').values('period').annotate(total=Sum('price_total')).order_by('period')
+    sonabel_price_map = {row['period']: float(row['total'] or 0) for row in sonabel_price_rows}
+    onea_price_map = {row['period']: float(row['total'] or 0) for row in onea_price_rows}
+    all_price_periods = sorted(set(sonabel_price_map.keys()) | set(onea_price_map.keys()))
+    price_periods = [d.strftime("%m/%Y") for d in all_price_periods]
+    sonabel_prices = [sonabel_price_map.get(period, 0.0) for period in all_price_periods]
+    onea_prices = [onea_price_map.get(period, 0.0) for period in all_price_periods]
+
+    paid_count = bills.filter(paid=True).count()
+    unpaid_count = bills.filter(paid=False).count()
+
+    current_year = datetime.date.today().year
+    previous_year = current_year - 1
+    month_labels = [f"{month:02d}" for month in range(1, 13)]
+    current_year_monthly = []
+    previous_year_monthly = []
+    current_year_bills = Bill.objects.filter(period__year=current_year)
+    previous_year_bills = Bill.objects.filter(period__year=previous_year)
+    for month in range(1, 13):
+        current_total = current_year_bills.filter(period__month=month).aggregate(total=Sum('price_total'))['total'] or 0
+        previous_total = previous_year_bills.filter(period__month=month).aggregate(total=Sum('price_total'))['total'] or 0
+        current_year_monthly.append(float(current_total))
+        previous_year_monthly.append(float(previous_total))
+
     context = {
         'bills': bills,
         'all_bills_price': all_bills_price,
@@ -119,6 +145,16 @@ def home_view(request):
         'consumptions_2': consumptions_2,
         'selected_year': selected_year,
         'available_years': available_years,
+        'sonabel_prices': sonabel_prices,
+        'onea_prices': onea_prices,
+        'price_periods': price_periods,
+        'paid_count': paid_count,
+        'unpaid_count': unpaid_count,
+        'current_year': current_year,
+        'previous_year': previous_year,
+        'current_year_monthly': current_year_monthly,
+        'previous_year_monthly': previous_year_monthly,
+        'month_labels': month_labels,
     }
     return render(request, 'bill/index.html', context)
 
@@ -214,7 +250,10 @@ def bills_list(request):
 
 @login_required
 def toggle_bill(request, id):
-    bill = Bill.objects.get(id=id)
+    if request.method != 'POST':
+        return redirect('bills_list')
+
+    bill = get_object_or_404(Bill, id=id)
     bill.paid = not bill.paid
     bill.save()
     messages.success(request, 'Statut de la facture mis à jour !')

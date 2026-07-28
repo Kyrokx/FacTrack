@@ -207,6 +207,44 @@
             </div>
         </article>
     </section>
+
+    <section class="grid gap-6 xl:grid-cols-2">
+        <article class="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-slate-200 sm:p-6">
+            <div class="flex items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-primary">Dépenses par mois</h2>
+                    <p class="text-sm text-textSecondary">Comparaison des montants SONABEL et ONEA par période.</p>
+                </div>
+            </div>
+            <div class="mt-5 h-80 w-full">
+                <canvas id="priceChart" class="h-full w-full"></canvas>
+            </div>
+        </article>
+
+        <article class="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-slate-200 sm:p-6">
+            <div class="flex items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-primary">Statut des factures</h2>
+                    <p class="text-sm text-textSecondary">Répartition des factures payées et impayées.</p>
+                </div>
+            </div>
+            <div class="relative mt-5 h-80 w-full">
+                <canvas id="statusChart" class="h-full w-full"></canvas>
+            </div>
+        </article>
+    </section>
+
+    <section class="rounded-3xl bg-white p-5 shadow-soft ring-1 ring-slate-200 sm:p-6">
+        <div class="flex items-center justify-between gap-4">
+            <div>
+                <h2 class="text-lg font-semibold text-primary">Comparaison {{ current_year }} vs {{ previous_year }}</h2>
+                <p class="text-sm text-textSecondary">Evolution mensuelle des dépenses sur deux années successives.</p>
+            </div>
+        </div>
+        <div class="mt-5 h-96 w-full">
+            <canvas id="yearComparisonChart" class="h-full w-full"></canvas>
+        </div>
+    </section>
 </div>
 {% endblock %}
 
@@ -290,6 +328,207 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#1A202C'
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            color: '#718096'
+                        },
+                        grid: {
+                            color: 'rgba(113, 128, 150, 0.08)'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: '#718096'
+                        },
+                        grid: {
+                            color: 'rgba(113, 128, 150, 0.12)'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    const priceCtx = document.getElementById('priceChart');
+    const pricePeriods = {{ price_periods|safe }};
+    const sonabelPrices = {{ sonabel_prices|safe }};
+    const oneaPrices = {{ onea_prices|safe }};
+
+    if (priceCtx) {
+        new Chart(priceCtx, {
+            type: 'bar',
+            data: {
+                labels: pricePeriods,
+                datasets: [
+                    {
+                        label: 'SONABEL',
+                        data: sonabelPrices,
+                        backgroundColor: '#2E86AB',
+                        borderColor: '#2E86AB',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'ONEA',
+                        data: oneaPrices,
+                        backgroundColor: '#20B2AA',
+                        borderColor: '#20B2AA',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#1A202C'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return context.dataset.label + ': ' + context.parsed.y + ' FCFA';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: false,
+                        ticks: {
+                            color: '#718096'
+                        },
+                        grid: {
+                            color: 'rgba(113, 128, 150, 0.08)'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Montant (FCFA)',
+                            color: '#1A202C'
+                        },
+                        ticks: {
+                            color: '#718096'
+                        },
+                        grid: {
+                            color: 'rgba(113, 128, 150, 0.12)'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    const statusCtx = document.getElementById('statusChart');
+    const paidCount = {{ paid_count }};
+    const unpaidCount = {{ unpaid_count }};
+    const totalBillsCount = paidCount + unpaidCount;
+
+    const centerTextPlugin = {
+        id: 'centerTextPlugin',
+        beforeDraw(chart) {
+            const { ctx, chartArea } = chart;
+            if (!chartArea) return;
+
+            const centerX = (chartArea.left + chartArea.right) / 2;
+            const centerY = (chartArea.top + chartArea.bottom) / 2;
+
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#1E3A5F';
+            ctx.font = '700 28px sans-serif';
+            ctx.fillText(totalBillsCount, centerX, centerY - 8);
+            ctx.fillStyle = '#718096';
+            ctx.font = '500 14px sans-serif';
+            ctx.fillText('factures', centerX, centerY + 18);
+            ctx.restore();
+        }
+    };
+
+    if (statusCtx) {
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Payées', 'Impayées'],
+                datasets: [{
+                    data: [paidCount, unpaidCount],
+                    backgroundColor: ['#27AE60', '#E74C3C'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                cutout: '72%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#1A202C'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return context.label + ': ' + context.parsed + ' factures';
+                            }
+                        }
+                    }
+                }
+            },
+            plugins: [centerTextPlugin]
+        });
+    }
+
+    const yearComparisonCtx = document.getElementById('yearComparisonChart');
+    const monthLabels = {{ month_labels|safe }};
+    const currentYearMonthly = {{ current_year_monthly|safe }};
+    const previousYearMonthly = {{ previous_year_monthly|safe }};
+
+    if (yearComparisonCtx) {
+        new Chart(yearComparisonCtx, {
+            type: 'line',
+            data: {
+                labels: monthLabels,
+                datasets: [
+                    {
+                        label: '{{ current_year }}',
+                        data: currentYearMonthly,
+                        borderColor: '#1E3A5F',
+                        backgroundColor: 'rgba(30, 58, 95, 0.1)',
+                        tension: 0.3,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#1E3A5F',
+                        pointBorderColor: '#1E3A5F',
+                        fill: false
+                    },
+                    {
+                        label: '{{ previous_year }}',
+                        data: previousYearMonthly,
+                        borderColor: '#F5A623',
+                        backgroundColor: 'rgba(245, 166, 35, 0.1)',
+                        tension: 0.3,
+                        borderWidth: 3,
+                        borderDash: [5, 5],
+                        pointBackgroundColor: '#F5A623',
+                        pointBorderColor: '#F5A623',
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
                 plugins: {
                     legend: {
                         labels: {
