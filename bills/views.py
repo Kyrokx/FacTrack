@@ -168,7 +168,7 @@ def home_view(request):
         'previous_year_monthly': previous_year_monthly,
         'month_labels': month_labels,
     }
-    return render(request, 'bill/index.html', context)
+    return render(request, 'bills/index.html', context)
 
 
 @login_required
@@ -181,7 +181,7 @@ def add_bills(request):
             return redirect('home')
     else:
         form = BillForm()
-    return render(request, 'bill/add_bills.html', {'form': form})
+    return render(request, 'bills/add_bills.html', {'form': form})
 
 
 @login_required
@@ -197,7 +197,7 @@ def edit_bill(request, id):
     else:
         form = BillForm(instance=bill)
 
-    return render(request, 'bill/edit_bill.html', {'form': form, 'bill': bill})
+    return render(request, 'bills/edit_bill.html', {'form': form, 'bill': bill})
 
 
 @login_required
@@ -214,7 +214,7 @@ def bill_detail(request, id):
         'is_overdue': bool(bill.deadline and bill.deadline < today and not bill.paid),
         'consumption_diff': consumption_diff,
     }
-    return render(request, 'bill/bill_detail.html', context)
+    return render(request, 'bills/bill_detail.html', context)
 
 
 @login_required
@@ -484,7 +484,7 @@ def bills_list(request):
 
     return render(
         request,
-        'bill/bills_list.html',
+        'bills/bills_list.html',
         {
             'bills': page_obj,
             'page_obj': page_obj,
