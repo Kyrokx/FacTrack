@@ -203,7 +203,13 @@
                                 class="inline-flex rounded-full bg-teal-100 px-3 py-1 text-xs font-semibold text-teal-700">ONEA</span>
                             {% endif %}
                         </td>
-                        <td class="px-4 py-4 text-textPrimary">{{ bill.period|date:"m/Y" }}</td>
+                        <td class="px-4 py-4 text-textPrimary">
+                            <a href="{% url 'bill_detail' bill.id %}"
+                                class="inline-flex items-center gap-2 rounded-lg font-semibold text-secondary transition hover:text-primary hover:underline">
+                                <i data-lucide="eye" class="h-4 w-4"></i>
+                                {{ bill.period|date:"m/Y" }}
+                            </a>
+                        </td>
                         <td class="px-4 py-4 text-textPrimary">{{ bill.deadline|date:"d/m/Y" }}</td>
                         <td class="px-4 py-4 font-semibold text-primary">{{ bill.price_total }} FCFA</td>                        
                         <td class="px-4 py-4 text-textPrimary">{{ bill.previous_index }}</td>

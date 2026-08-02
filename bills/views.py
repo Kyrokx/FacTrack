@@ -1,5 +1,6 @@
 import csv
 import datetime
+from datetime import date
 from io import BytesIO
 
 from django.shortcuts import render, redirect, get_object_or_404
@@ -197,6 +198,23 @@ def edit_bill(request, id):
         form = BillForm(instance=bill)
 
     return render(request, 'bill/edit_bill.html', {'form': form, 'bill': bill})
+
+
+@login_required
+def bill_detail(request, id):
+    bill = get_object_or_404(Bill, id=id)
+    today = date.today()
+    days_until_deadline = (bill.deadline - today).days if bill.deadline else 0
+    consumption_diff = bill.new_index - bill.previous_index
+
+    context = {
+        'bill': bill,
+        'unit': 'kWh' if bill.type == 'SONABEL' else 'm³',
+        'days_until_deadline': days_until_deadline,
+        'is_overdue': bool(bill.deadline and bill.deadline < today and not bill.paid),
+        'consumption_diff': consumption_diff,
+    }
+    return render(request, 'bill/bill_detail.html', context)
 
 
 @login_required
