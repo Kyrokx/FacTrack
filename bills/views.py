@@ -6,7 +6,7 @@ from io import BytesIO
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
-from .mixins import require_organisation
+from .mixins import require_organization
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.http import HttpResponse
@@ -20,7 +20,7 @@ from reportlab.lib.units import mm
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
 from .forms import BillForm, RegisterForm, OrganizationForm
-from .models import Bill,Membership, Organization
+from .models import Bill,Membership, Organization, generate_invite_code
 
 
 # Create your views here.
@@ -56,7 +56,7 @@ def create_organization_view(request):
             Membership.objects.create(
                 user=request.user,
                 organization=organization,
-                role='admin'
+                role='owner'
             )
             messages.success(request, 'Foyer crée avec succès !')
             return redirect('home')
@@ -84,7 +84,7 @@ def join_organization_view(request):
             messages.error(request, 'Code d\'invitation invalide.')
     return render(request, 'registration/join_organization.html')
 
-@require_organisation
+@require_organization
 def home_view(request):
     selected_year = request.GET.get('year', None)
     available_years = list(Bill.objects.dates('period', 'year', order='DESC'))
@@ -228,7 +228,56 @@ def home_view(request):
     return render(request, 'bill/index.html', context)
 
 
-@require_organisation
+@require_organization
+def organization_settings_view(request):
+    if request.user.membership.role not in ['owner', 'admin']:
+            messages.error(request, 'Accès réservé aux administrateurs.')
+            return redirect('home')
+    organization = request.organization
+    members = organization.memberships.all()
+
+    if request.method == 'POST' and 'regenerate_code' in request.POST:
+        organization.invite_code = generate_invite_code()
+        organization.save()
+        messages.success(request, 'Code d\'invitation régénéré avec succès !')
+        return redirect('organization_settings')
+    context = {
+        'organization': organization,
+        'members': members,
+    }
+    return render(request, 'bill/organization_settings.html', context)
+
+@login_required
+@require_organization
+def promote_member_view(request, membership_id):
+    if request.method != 'POST':
+        return redirect('organization_settings')
+    
+    if request.user.membership.role != 'owner':
+        messages.error(request, 'Seul le propriétaire peut modifier les rôles.')
+        return redirect('organization_settings')
+    
+    membership = get_object_or_404(
+        Membership, 
+        id=membership_id, 
+        organization=request.organization
+    )
+    
+    if membership.user == request.user:
+        messages.error(request, 'Vous ne pouvez pas modifier votre propre rôle.')
+        return redirect('organization_settings')
+    
+    if membership.role == 'member':
+        membership.role = 'admin'
+        messages.success(request, f'{membership.user.username} est maintenant administrateur.')
+    elif membership.role == 'admin':
+        membership.role = 'member'
+        messages.success(request, f'{membership.user.username} est maintenant membre.')
+    
+    membership.save()
+    return redirect('organization_settings')
+
+@require_organization
 def add_bills(request):
     if request.method == 'POST':
         form = BillForm(request.POST)
@@ -243,7 +292,7 @@ def add_bills(request):
     return render(request, 'bill/add_bills.html', {'form': form})
 
 
-@require_organisation
+@require_organization
 def edit_bill(request, id):
     bill = get_object_or_404(Bill, id=id, organization=request.organization)
 
@@ -259,7 +308,7 @@ def edit_bill(request, id):
     return render(request, 'bill/edit_bill.html', {'form': form, 'bill': bill})
 
 
-@require_organisation
+@require_organization
 def bill_detail(request, id):
     bill = get_object_or_404(Bill, id=id, organization=request.organization)
     today = date.today()
@@ -276,7 +325,7 @@ def bill_detail(request, id):
     return render(request, 'bill/bill_detail.html', context)
 
 
-@require_organisation
+@require_organization
 def delete_bill(request, id):
     bill = get_object_or_404(Bill, id=id)
 
@@ -302,7 +351,7 @@ def _get_export_bills_queryset(request):
     return bills.order_by('-period', '-id')
 
 
-@require_organisation
+@require_organization
 def export_bills_csv(request):
     bills = _get_export_bills_queryset(request)
     export_date = datetime.date.today().strftime('%Y-%m-%d')
@@ -339,7 +388,7 @@ def export_bills_csv(request):
     return response
 
 
-@require_organisation
+@require_organization
 def export_bills_pdf(request):
     bills = list(_get_export_bills_queryset(request))
     export_date = datetime.date.today().strftime('%Y-%m-%d')
@@ -507,7 +556,7 @@ def export_bills_pdf(request):
     return response
 
 
-@require_organisation
+@require_organization
 def bills_list(request):
     type_filter = request.GET.get('type')
     q = request.GET.get('q', '')
@@ -555,7 +604,7 @@ def bills_list(request):
     )
 
 
-@require_organisation
+@require_organization
 def toggle_bill(request, id):
     if request.method != 'POST':
         return redirect('bills_list')

@@ -23,6 +23,7 @@ class Organization(models.Model):
 class Membership(models.Model):
 
     TYPE_CHOICES = [
+            ('owner', 'owner'),
             ('admin', 'admin'),
             ('member', 'member'),
         ]
@@ -52,7 +53,7 @@ class Bill(models.Model):
     organization = models.ForeignKey('Organization', null=True, blank=True, on_delete=models.SET_NULL, related_name='bills')
 
     def __str__(self):
-        return f"{self.type} - {self.period.strftime('%m-%Y')}"
+        return f"{self.type} - {self.organization.name} - {self.period.strftime('%m-%Y')}"
 
     class Meta:
         ordering = ['-period']
