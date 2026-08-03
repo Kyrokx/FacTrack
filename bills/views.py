@@ -5,6 +5,8 @@ from io import BytesIO
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login
+from .mixins import require_organisation
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.http import HttpResponse
@@ -17,8 +19,8 @@ from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
-from .forms import BillForm
-from .models import Bill
+from .forms import BillForm, RegisterForm, OrganizationForm
+from .models import Bill,Membership, Organization
 
 
 # Create your views here.
@@ -26,8 +28,36 @@ from .models import Bill
 def login_view(request):
     return render(request, 'registration/login.html')
 
+def signup_view(request):
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('setup')
+    else:
+        form = RegisterForm()
+    return render(request, 'registration/signup.html', {'form': form})
 
 @login_required
+def setup_view(request):
+    if request.method == 'POST':
+        form = OrganizationForm(request.POST)
+        if form.is_valid():
+            organization = form.save()
+            Membership.objects.create(
+                user=request.user,
+                organization=organization,
+                role='admin'
+            )
+            return redirect('home')
+    else:
+        form = OrganizationForm()
+    return render(request, 'registration/setup.html', {'form': form})
+
+
+
+@require_organisation
 def home_view(request):
     selected_year = request.GET.get('year', None)
     available_years = list(Bill.objects.dates('period', 'year', order='DESC'))
@@ -171,7 +201,7 @@ def home_view(request):
     return render(request, 'bill/index.html', context)
 
 
-@login_required
+@require_organisation
 def add_bills(request):
     if request.method == 'POST':
         form = BillForm(request.POST)
@@ -184,7 +214,7 @@ def add_bills(request):
     return render(request, 'bill/add_bills.html', {'form': form})
 
 
-@login_required
+@require_organisation
 def edit_bill(request, id):
     bill = get_object_or_404(Bill, id=id)
 
@@ -200,7 +230,7 @@ def edit_bill(request, id):
     return render(request, 'bill/edit_bill.html', {'form': form, 'bill': bill})
 
 
-@login_required
+@require_organisation
 def bill_detail(request, id):
     bill = get_object_or_404(Bill, id=id)
     today = date.today()
@@ -217,7 +247,7 @@ def bill_detail(request, id):
     return render(request, 'bill/bill_detail.html', context)
 
 
-@login_required
+@require_organisation
 def delete_bill(request, id):
     bill = get_object_or_404(Bill, id=id)
 
@@ -243,7 +273,7 @@ def _get_export_bills_queryset(request):
     return bills.order_by('-period', '-id')
 
 
-@login_required
+@require_organisation
 def export_bills_csv(request):
     bills = _get_export_bills_queryset(request)
     export_date = datetime.date.today().strftime('%Y-%m-%d')
@@ -280,7 +310,7 @@ def export_bills_csv(request):
     return response
 
 
-@login_required
+@require_organisation
 def export_bills_pdf(request):
     bills = list(_get_export_bills_queryset(request))
     export_date = datetime.date.today().strftime('%Y-%m-%d')
@@ -448,7 +478,7 @@ def export_bills_pdf(request):
     return response
 
 
-@login_required
+@require_organisation
 def bills_list(request):
     type_filter = request.GET.get('type')
     q = request.GET.get('q', '')
@@ -496,7 +526,7 @@ def bills_list(request):
     )
 
 
-@login_required
+@require_organisation
 def toggle_bill(request, id):
     if request.method != 'POST':
         return redirect('bills_list')
