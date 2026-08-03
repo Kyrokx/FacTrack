@@ -41,6 +41,14 @@ def signup_view(request):
 
 @login_required
 def setup_view(request):
+    if hasattr(request.user, 'membership'):
+        messages.info(request, 'Vous appartenez déjà à une organisation.')
+        return redirect('home')
+
+    return render(request, 'registration/setup.html')
+
+@login_required
+def create_organization_view(request):
     if request.method == 'POST':
         form = OrganizationForm(request.POST)
         if form.is_valid():
@@ -54,9 +62,27 @@ def setup_view(request):
             return redirect('home')
     else:
         form = OrganizationForm()
-    return render(request, 'registration/setup.html', {'form': form})
+    return render(request, 'registration/create_organization.html', {'form': form})
 
-
+@login_required
+def join_organization_view(request):
+    if request.method == 'POST':
+        invite_code = request.POST.get('invite_code')
+        if hasattr(request.user, 'membership'):
+            messages.error(request, 'Vous appartenez déjà à une organisation.')
+            return redirect('home')
+        try:
+            organization = Organization.objects.get(invite_code=invite_code)
+            Membership.objects.create(
+                user=request.user,
+                organization=organization,
+                role='member'
+            )
+            messages.success(request, f'Vous avez rejoint le foyer {organization.name} avec succès !')
+            return redirect('home')
+        except Organization.DoesNotExist:
+            messages.error(request, 'Code d\'invitation invalide.')
+    return render(request, 'registration/join_organization.html')
 
 @require_organisation
 def home_view(request):

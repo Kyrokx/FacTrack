@@ -49,7 +49,7 @@ class Bill(models.Model):
     new_index = models.IntegerField()
     total_consumption = models.IntegerField()
     paid = models.BooleanField(default=False)
-    organization = models.ForeignKey('Organization', null=False, blank=False, on_delete=models.CASCADE, related_name='bills')
+    organization = models.ForeignKey('Organization', null=True, blank=True, on_delete=models.SET_NULL, related_name='bills')
 
     def __str__(self):
         return f"{self.type} - {self.period.strftime('%m-%Y')}"

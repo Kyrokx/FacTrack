@@ -17,13 +17,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.contrib.auth import views as auth_views
-from bills.views import home_view,add_bills,bills_list,toggle_bill,edit_bill,delete_bill,export_bills_csv,export_bills_pdf,bill_detail,signup_view,setup_view
+from bills.views import home_view,add_bills,bills_list,toggle_bill,edit_bill,delete_bill,export_bills_csv,export_bills_pdf,bill_detail,signup_view,setup_view,create_organization_view,join_organization_view
 
 
 urlpatterns = [
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('signup/', signup_view, name='signup'),
     path('setup/', setup_view, name='setup'),
+    path('create/', create_organization_view, name='create_organization'),
+    path('join/', join_organization_view, name='join_organization'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('', home_view, name='home'),
     path('add/', add_bills, name='add_bills'),
