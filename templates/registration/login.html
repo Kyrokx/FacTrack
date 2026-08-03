@@ -15,7 +15,7 @@
             {% csrf_token %}
 
             <div>
-                <label for="id_username" class="mb-2 block text-sm font-semibold text-primary">Email</label>
+                <label for="id_username" class="mb-2 block text-sm font-semibold text-primary">Nom d'utilisateur</label>
                 {{ form.username }}
                 {% if form.username.errors %}
                     <p class="mt-2 text-sm text-danger">{{ form.username.errors|striptags }}</p>

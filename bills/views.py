@@ -50,6 +50,7 @@ def setup_view(request):
                 organization=organization,
                 role='admin'
             )
+            messages.success(request, 'Foyer crée avec succès !')
             return redirect('home')
     else:
         form = OrganizationForm()
@@ -62,7 +63,7 @@ def home_view(request):
     selected_year = request.GET.get('year', None)
     available_years = list(Bill.objects.dates('period', 'year', order='DESC'))
 
-    bills = Bill.objects.all()
+    bills = Bill.objects.filter(organization=request.organization)
     if selected_year:
         bills = bills.filter(period__year=selected_year)
 
@@ -150,8 +151,8 @@ def home_view(request):
     month_labels = [f"{month:02d}" for month in range(1, 13)]
     current_year_monthly = []
     previous_year_monthly = []
-    current_year_bills = Bill.objects.filter(period__year=current_year)
-    previous_year_bills = Bill.objects.filter(period__year=previous_year)
+    current_year_bills = bills.filter(period__year=current_year)
+    previous_year_bills = bills.filter(period__year=previous_year)
     for month in range(1, 13):
         current_total = current_year_bills.filter(period__month=month).aggregate(total=Sum('price_total'))['total'] or 0
         previous_total = previous_year_bills.filter(period__month=month).aggregate(total=Sum('price_total'))['total'] or 0
@@ -206,7 +207,9 @@ def add_bills(request):
     if request.method == 'POST':
         form = BillForm(request.POST)
         if form.is_valid():
-            form.save()
+            bill = form.save(commit=False)
+            bill.organization = request.organization
+            bill.save() 
             messages.success(request, 'Facture ajoutée avec succès !')
             return redirect('home')
     else:
@@ -216,7 +219,7 @@ def add_bills(request):
 
 @require_organisation
 def edit_bill(request, id):
-    bill = get_object_or_404(Bill, id=id)
+    bill = get_object_or_404(Bill, id=id, organization=request.organization)
 
     if request.method == 'POST':
         form = BillForm(request.POST, instance=bill)
@@ -232,7 +235,7 @@ def edit_bill(request, id):
 
 @require_organisation
 def bill_detail(request, id):
-    bill = get_object_or_404(Bill, id=id)
+    bill = get_object_or_404(Bill, id=id, organization=request.organization)
     today = date.today()
     days_until_deadline = (bill.deadline - today).days if bill.deadline else 0
     consumption_diff = bill.new_index - bill.previous_index
@@ -260,7 +263,7 @@ def delete_bill(request, id):
 
 
 def _get_export_bills_queryset(request):
-    bills = Bill.objects.all()
+    bills = Bill.objects.filter(organization=request.organization)
     type_filter = request.GET.get('type')
     year_filter = request.GET.get('year')
 
@@ -495,7 +498,7 @@ def bills_list(request):
 
     order_prefix = '-' if order == 'desc' else ''
 
-    bills = Bill.objects.all()
+    bills = Bill.objects.filter(organization=request.organization)
     if type_filter in ['SONABEL', 'ONEA']:
         bills = bills.filter(type=type_filter)
 
@@ -531,7 +534,7 @@ def toggle_bill(request, id):
     if request.method != 'POST':
         return redirect('bills_list')
 
-    bill = get_object_or_404(Bill, id=id)
+    bill = bill = get_object_or_404(Bill, id=id, organization=request.organization)
     bill.paid = not bill.paid
     bill.save()
     messages.success(request, 'Statut de la facture mis à jour !')
