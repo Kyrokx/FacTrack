@@ -24,8 +24,7 @@ from .models import Bill,Membership, Organization, generate_invite_code
 
 from .services import *
 from .utils import *
-from .pdf_generator import *
-from .csv_generator import *
+
 
 # Create your views here.
 
@@ -311,50 +310,20 @@ def export_bills_pdf(request):
 
 @require_organization
 def bills_list(request):
-    type_filter = request.GET.get('type')
-    q = request.GET.get('q', '')
-    sort_param = request.GET.get('sort', '-period')
-    order = request.GET.get('order', 'desc')
-
-    allowed_sort_fields = {'period', 'deadline', 'price_total', 'total_consumption', 'paid'}
-    sort_field = sort_param.lstrip('-')
-    if sort_field not in allowed_sort_fields:
-        sort_field = 'period'
-
-    if order not in {'asc', 'desc'}:
-        order = 'desc' if sort_param.startswith('-') else 'asc'
-
-    order_prefix = '-' if order == 'desc' else ''
-
     bills = Bill.objects.filter(organization=request.organization)
-    if type_filter in ['SONABEL', 'ONEA']:
-        bills = bills.filter(type=type_filter)
-
-    if q:
-        bills = bills.filter(
-            Q(period__icontains=q) |
-            Q(type__icontains=q) |
-            Q(price_total__icontains=q)
-        )
-
-    bills = bills.order_by(f'{order_prefix}{sort_field}')
+    bills, type_filter, q, sort_field, order = get_filtered_bills(request, bills)
 
     paginator = Paginator(bills, 15)
-    page_number = request.GET.get('page', 1)
-    page_obj = paginator.get_page(page_number)
+    page_obj = paginator.get_page(request.GET.get('page', 1))
 
-    return render(
-        request,
-        'bill/bills_list.html',
-        {
-            'bills': page_obj,
-            'page_obj': page_obj,
-            'active_filter': type_filter,
-            'q': q,
-            'current_sort': sort_field,
-            'current_order': order,
-        }
-    )
+    return render(request, 'bill/bills_list.html', {
+        'bills': page_obj,
+        'page_obj': page_obj,
+        'active_filter': type_filter,
+        'q': q,
+        'current_sort': sort_field,
+        'current_order': order,
+    })
 
 
 @require_organization

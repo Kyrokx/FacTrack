@@ -1,6 +1,6 @@
 import datetime
 from django.db.models import Sum
-
+from django.db.models import Q
 
 def get_bill_stats(bills):
     unpaid_bills = bills.filter(paid=False)
@@ -72,6 +72,7 @@ def get_price_chart_data(bills):
 
 
 def get_year_comparison(bills, current_year, previous_year):
+    
     current_bills = bills.filter(period__year=current_year)
     previous_bills = bills.filter(period__year=previous_year)
 
@@ -88,3 +89,32 @@ def get_year_comparison(bills, current_year, previous_year):
         'previous_year_monthly': previous_monthly,
         'month_labels': [f"{m:02d}" for m in range(1, 13)],
     }
+
+
+def get_filtered_bills(request, bills):
+    type_filter = request.GET.get('type')
+    q = request.GET.get('q', '')
+    sort_param = request.GET.get('sort', '-period')
+    order = request.GET.get('order', 'desc')
+
+    allowed_sort_fields = {'period', 'deadline', 'price_total', 'total_consumption', 'paid'}
+    sort_field = sort_param.lstrip('-')
+    if sort_field not in allowed_sort_fields:
+        sort_field = 'period'
+
+    if order not in {'asc', 'desc'}:
+        order = 'desc' if sort_param.startswith('-') else 'asc'
+
+    if type_filter in ['SONABEL', 'ONEA']:
+        bills = bills.filter(type=type_filter)
+
+    if q:
+        bills = bills.filter(
+            Q(type__icontains=q) |
+            Q(price_total__icontains=q)
+        )
+
+    order_prefix = '-' if order == 'desc' else ''
+    bills = bills.order_by(f'{order_prefix}{sort_field}')
+
+    return bills, type_filter, q, sort_field, order
