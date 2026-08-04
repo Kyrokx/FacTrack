@@ -17,7 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.contrib.auth import views as auth_views
-from bills.views import home_view,add_bills,bills_list,toggle_bill,edit_bill,delete_bill,export_bills_csv,export_bills_pdf,bill_detail,signup_view,setup_view,create_organization_view,join_organization_view,organization_settings_view,promote_member_view
+from bills.views import * 
+
+
+#home_view,add_bills,bills_list,toggle_bill,edit_bill,delete_bill,export_bills_csv,export_bills_pdf,bill_detail,signup_view,setup_view,create_organization_view,join_organization_view,organization_settings_view,promote_member_view,remove_member_view,leave_organization_view
 
 
 urlpatterns = [
@@ -38,5 +41,7 @@ urlpatterns = [
     path('toggle/<int:id>/', toggle_bill, name='toggle_bill'),
     path('organization/settings/', organization_settings_view, name='organization_settings'),
     path('organization/member/<int:membership_id>/promote/', promote_member_view, name='promote_member'),
+    path('organization/member/<int:membership_id>/remove/', remove_member_view, name='remove_member'),
+    path('organization/leave/', leave_organization_view, name='leave_organization'),
     path('admin/', admin.site.urls),
 ]

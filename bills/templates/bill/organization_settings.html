@@ -71,6 +71,7 @@
                         <th class="px-4 py-3 font-semibold">Rôle</th>
                         <th class="px-4 py-3 font-semibold">Promotion</th>
                         <th class="px-4 py-3 font-semibold">Membre depuis</th>
+                        <th class="px-4 py-3 font-semibold">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200">
@@ -88,12 +89,22 @@
                         <td class="px-4 py-3 text-textSecondary">
                             <form method="post" action="{% url 'promote_member' membership.id %}">
                                 {% csrf_token %}
-                                <button type="submit" class="rounded-xl border px-3 py-1 text-xs font-semibold transition {% if membership.role == 'member' %}border-secondary text-secondary hover:bg-secondary hover:text-white {% else %}border-danger text-danger hover:bg-danger hover:text-white{% endif %}">
+                                <button type="submit"
+                                    class="rounded-xl border px-3 py-1 text-xs font-semibold transition {% if membership.role == 'member' %}border-secondary text-secondary hover:bg-secondary hover:text-white {% else %}border-danger text-danger hover:bg-danger hover:text-white{% endif %}">
                                     {% if membership.role == 'member' %}Promouvoir{% else %}Rétrograder{% endif %}
                                 </button>
                             </form>
                         </td>
                         <td class="px-4 py-3 text-textSecondary">{{ membership.joined_at|date:"d/m/Y" }}</td>
+                        <td class="px-4 py-3 text-textSecondary">
+                            <form method="post" action="{% url 'remove_member' membership.id %}">
+                                {% csrf_token %}
+                                <button type="submit"
+                                    class="rounded-xl border px-3 py-1 text-xs font-semibold transition border-danger text-danger hover:bg-danger hover:text-white">
+                                    Supprimer
+                                </button>
+                            </form>
+                        </td>
                     </tr>
                     {% empty %}
                     <tr>

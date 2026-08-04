@@ -247,7 +247,6 @@ def organization_settings_view(request):
     }
     return render(request, 'bill/organization_settings.html', context)
 
-@login_required
 @require_organization
 def promote_member_view(request, membership_id):
     if request.method != 'POST':
@@ -276,6 +275,52 @@ def promote_member_view(request, membership_id):
     
     membership.save()
     return redirect('organization_settings')
+
+@require_organization
+def remove_member_view(request, membership_id):
+    if request.method != 'POST':
+        return redirect('organization_settings')
+    
+    if request.user.membership.role != 'owner':
+        messages.error(request, 'Seul le propriétaire peut supprimer des membres.')
+        return redirect('organization_settings')
+    
+    membership = get_object_or_404(
+        Membership, 
+        id=membership_id, 
+        organization=request.organization
+    )
+    
+    if membership.user == request.user:
+        messages.error(request, 'Vous ne pouvez pas supprimer votre propre compte.')
+        return redirect('organization_settings')
+
+    if membership.role == 'owner':
+        messages.error(request, 'Vous ne pouvez pas supprimer un propriétaire.')
+        return redirect('organization_settings')
+
+    membership.delete()
+    messages.success(request, f'{membership.user.username} a été supprimé du foyer.')
+    return redirect('organization_settings')
+
+@require_organization
+def leave_organization_view(request):
+    if request.method != 'POST':
+        return redirect('organization_settings')
+    
+    membership = get_object_or_404(
+        Membership, 
+        user=request.user, 
+        organization=request.organization
+    )
+    
+    if membership.role == 'owner':
+        messages.error(request, 'Le propriétaire ne peut pas quitter le foyer. Veuillez transférer la propriété ou supprimer le foyer.')
+        return redirect('organization_settings')
+
+    membership.delete()
+    messages.success(request, 'Vous avez quitté le foyer avec succès.')
+    return redirect('setup')
 
 @require_organization
 def add_bills(request):
