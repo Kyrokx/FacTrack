@@ -22,6 +22,7 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, Tabl
 from .forms import BillForm, RegisterForm, OrganizationForm
 from .models import Bill,Membership, Organization, generate_invite_code
 
+from .services import *
 
 # Create your views here.
 
@@ -93,137 +94,44 @@ def home_view(request):
     if selected_year:
         bills = bills.filter(period__year=selected_year)
 
-    all_bills_price = bills.aggregate(Sum('price_total'))['price_total__sum'] or 0
-    unpaid_bills = bills.filter(paid=False).all()
-    unpaid_bills_price = unpaid_bills.aggregate(Sum('price_total'))['price_total__sum'] or 0
-
-    sonabel_bills_descending = bills.filter(type='SONABEL').order_by('-period')[:5]
-    sonabel_bills = bills.filter(type='SONABEL').order_by('period')
-
-    all_sonabel_bills_price = bills.filter(type="SONABEL").aggregate(Sum('price_total'))['price_total__sum'] or 0
-
-    sonabal_consumption = sonabel_bills.values_list('total_consumption', flat=True)
-    sonabel_bills_period = sonabel_bills.values_list('period', flat=True)
-    average_sonabel_consumption = sum(sonabal_consumption) / len(sonabal_consumption) if sonabal_consumption else 0
-
-    # percentage sonabel consumption compared to the previous month
-    sonabel_consumptions_list = list(sonabal_consumption)
-    sonabel_consumption_percentage = 0
-    if len(sonabel_consumptions_list) >= 2:
-        last = sonabel_consumptions_list[-1]
-        prev = sonabel_consumptions_list[-2]
-        if prev:
-            sonabel_consumption_percentage = ((last - prev) / prev) * 100
-
-    average_sonabel_price = sum(bill.price_total for bill in sonabel_bills) / len(sonabel_bills) if sonabel_bills else 0
-    # percentage sonabel price compared to the previous month
-    sonabel_prices = sonabel_bills.values_list('price_total', flat=True)
-    sonabel_prices_list = list(sonabel_prices)
-    sonabel_price_percentage = 0
-    if len(sonabel_prices_list) >= 2:
-        last_price = sonabel_prices_list[-1]
-        prev_price = sonabel_prices_list[-2]
-        if prev_price:
-            sonabel_price_percentage = ((last_price - prev_price) / prev_price) * 100
-
-    periods_1 = [d.strftime("%m/%Y") for d in sonabel_bills_period]
-    consumptions_1 = sonabel_consumptions_list
-
-    onea_bills_descending = bills.filter(type='ONEA').order_by('-period')[:5]
-    onea_bills = bills.filter(type='ONEA').order_by('period')
-
-    all_onea_bills_price = bills.filter(type="ONEA").aggregate(Sum('price_total'))['price_total__sum'] or 0
-
-    onea_consumption = onea_bills.values_list('total_consumption', flat=True)
-    onea_bills_period = onea_bills.values_list('period', flat=True)
-    average_onea_consumption = sum(onea_consumption) / len(onea_consumption) if onea_consumption else 0
-    average_onea_price = sum(bill.price_total for bill in onea_bills) / len(onea_bills) if onea_bills else 0
-    # percentage onea consumption compared to the previous month
-    onea_consumptions_list = list(sonabal_consumption)
-    onea_consumption_percentage = 0
-    if len(onea_consumptions_list) >= 2:
-        last = onea_consumptions_list[-1]
-        prev = onea_consumptions_list[-2]
-        if prev:
-            onea_consumption_percentage = ((last - prev) / prev) * 100
-
-    average_onea_price = sum(bill.price_total for bill in onea_bills) / len(onea_bills) if onea_bills else 0
-    # percentage onea price compared to the previous month
-    onea_prices = onea_bills.values_list('price_total', flat=True)
-    onea_prices_list = list(onea_prices)
-    onea_price_percentage = 0
-    if len(onea_prices_list) >= 2:
-        last_price = onea_prices_list[-1]
-        prev_price = onea_prices_list[-2]
-        if prev_price:
-            onea_price_percentage = ((last_price - prev_price) / prev_price) * 100
-    periods_2 = [d.strftime("%m/%Y") for d in onea_bills_period]
-    consumptions_2 = list(onea_consumption)
-
-    sonabel_price_rows = bills.filter(type='SONABEL').values('period').annotate(total=Sum('price_total')).order_by('period')
-    onea_price_rows = bills.filter(type='ONEA').values('period').annotate(total=Sum('price_total')).order_by('period')
-    sonabel_price_map = {row['period']: float(row['total'] or 0) for row in sonabel_price_rows}
-    onea_price_map = {row['period']: float(row['total'] or 0) for row in onea_price_rows}
-    all_price_periods = sorted(set(sonabel_price_map.keys()) | set(onea_price_map.keys()))
-    price_periods = [d.strftime("%m/%Y") for d in all_price_periods]
-    sonabel_prices = [sonabel_price_map.get(period, 0.0) for period in all_price_periods]
-    onea_prices = [onea_price_map.get(period, 0.0) for period in all_price_periods]
-
-    paid_count = bills.filter(paid=True).count()
-    unpaid_count = bills.filter(paid=False).count()
-
     current_year = datetime.date.today().year
     previous_year = current_year - 1
-    month_labels = [f"{month:02d}" for month in range(1, 13)]
-    current_year_monthly = []
-    previous_year_monthly = []
-    current_year_bills = bills.filter(period__year=current_year)
-    previous_year_bills = bills.filter(period__year=previous_year)
-    for month in range(1, 13):
-        current_total = current_year_bills.filter(period__month=month).aggregate(total=Sum('price_total'))['total'] or 0
-        previous_total = previous_year_bills.filter(period__month=month).aggregate(total=Sum('price_total'))['total'] or 0
-        current_year_monthly.append(float(current_total))
-        previous_year_monthly.append(float(previous_total))
+
+    bills_stats = get_bill_stats(bills)
+    sonabel_stats = get_sonabel_stats(bills)
+    onea_stats = get_onea_stats(bills)
+    price_chart = get_price_chart_data(bills)
+    year_comparison = get_year_comparison(bills, current_year, previous_year)
 
     context = {
         'bills': bills,
-        'all_bills_price': all_bills_price,
-        'unpaid_bills': unpaid_bills,
-        'unpaid_bills_price': unpaid_bills_price,
-
-        'sonabel_bills_descending': sonabel_bills_descending,
-        'onea_bills_descending': onea_bills_descending,
-
-        'all_sonabel_bills_price': all_sonabel_bills_price,
-        'all_onea_bills_price': all_onea_bills_price,
-
-        'average_sonabel_consumption': average_sonabel_consumption,
-        'average_sonabel_price': average_sonabel_price,
-        'sonabel_consumption_percentage': sonabel_consumption_percentage,
-        'sonabel_price_percentage': sonabel_price_percentage,
-
-        'average_onea_consumption': round(average_onea_consumption),
-        'average_onea_price': round(average_onea_price),
-        'onea_consumption_percentage': round(onea_consumption_percentage),
-        'onea_price_percentage': round(onea_price_percentage),
-
-        'periods_1': periods_1,
-        'consumptions_1': consumptions_1,
-
-        'periods_2': periods_2,
-        'consumptions_2': consumptions_2,
         'selected_year': selected_year,
         'available_years': available_years,
-        'sonabel_prices': sonabel_prices,
-        'onea_prices': onea_prices,
-        'price_periods': price_periods,
-        'paid_count': paid_count,
-        'unpaid_count': unpaid_count,
         'current_year': current_year,
         'previous_year': previous_year,
-        'current_year_monthly': current_year_monthly,
-        'previous_year_monthly': previous_year_monthly,
-        'month_labels': month_labels,
+
+        **bills_stats,
+
+        'sonabel_bills_descending': sonabel_stats['bills_descending'],
+        'all_sonabel_bills_price': sonabel_stats['total_price'],
+        'average_sonabel_consumption': sonabel_stats['avg_consumption'],
+        'average_sonabel_price': sonabel_stats['avg_price'],
+        'sonabel_consumption_percentage': sonabel_stats['consumption_pct'],
+        'sonabel_price_percentage': sonabel_stats['price_pct'],
+        'periods_1': sonabel_stats['periods'],
+        'consumptions_1': sonabel_stats['consumptions'],
+
+        'onea_bills_descending': onea_stats['bills_descending'],
+        'all_onea_bills_price': onea_stats['total_price'],
+        'average_onea_consumption': onea_stats['avg_consumption'],
+        'average_onea_price': onea_stats['avg_price'],
+        'onea_consumption_percentage': onea_stats['consumption_pct'],
+        'onea_price_percentage': onea_stats['price_pct'],
+        'periods_2': onea_stats['periods'],
+        'consumptions_2': onea_stats['consumptions'],
+
+        **price_chart,
+        **year_comparison,
     }
     return render(request, 'bill/index.html', context)
 
@@ -372,7 +280,7 @@ def bill_detail(request, id):
 
 @require_organization
 def delete_bill(request, id):
-    bill = get_object_or_404(Bill, id=id)
+    bill = get_object_or_404(Bill, id=id,organization=request.organization)
 
     if request.method != 'POST':
         return redirect('bills_list')
