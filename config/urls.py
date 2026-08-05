@@ -15,33 +15,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
-from django.contrib.auth import views as auth_views
-from bills.views import * 
+from django.urls import path,include
 
 
-#home_view,add_bills,bills_list,toggle_bill,edit_bill,delete_bill,export_bills_csv,export_bills_pdf,bill_detail,signup_view,setup_view,create_organization_view,join_organization_view,organization_settings_view,promote_member_view,remove_member_view,leave_organization_view
 
 
 urlpatterns = [
-    path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
-    path('signup/', signup_view, name='signup'),
-    path('setup/', setup_view, name='setup'),
-    path('create/', create_organization_view, name='create_organization'),
-    path('join/', join_organization_view, name='join_organization'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
-    path('', home_view, name='home'),
-    path('add/', add_bills, name='add_bills'),
-    path('bills/', bills_list, name='bills_list'),
-    path('bills/<int:id>/', bill_detail, name='bill_detail'),
-    path('export/csv/', export_bills_csv, name='export_csv'),
-    path('export/pdf/', export_bills_pdf, name='export_pdf'),
-    path('edit/<int:id>/', edit_bill, name='edit_bill'),
-    path('delete/<int:id>/', delete_bill, name='delete_bill'),
-    path('toggle/<int:id>/', toggle_bill, name='toggle_bill'),
-    path('organization/settings/', organization_settings_view, name='organization_settings'),
-    path('organization/member/<int:membership_id>/promote/', promote_member_view, name='promote_member'),
-    path('organization/member/<int:membership_id>/remove/', remove_member_view, name='remove_member'),
-    path('organization/leave/', leave_organization_view, name='leave_organization'),
+    path('', include('bills.urls')),
+    path('', include('organizations.urls')),
     path('admin/', admin.site.urls),
 ]
