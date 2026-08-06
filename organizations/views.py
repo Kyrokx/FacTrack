@@ -71,7 +71,7 @@ def organization_settings_view(request):
         'organization': organization,
         'members': members,
     }
-    return render(request, 'bill/organization_settings.html', context)
+    return render(request, 'organizations/organization_settings.html', context)
 
 @require_organization
 def promote_member_view(request, membership_id):

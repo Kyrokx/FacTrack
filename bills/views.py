@@ -10,31 +10,16 @@ from django.core.paginator import Paginator
 from django.http import HttpResponse
 
 from .forms import BillForm
-from organizations.forms import RegisterForm
 from .models import Bill
 
 from .services import *
 from .utils import *
 
-
-# Create your views here.
-
-def login_view(request):
-    return render(request, 'registration/login.html')
-
-def signup_view(request):
-    if request.method == 'POST':
-        form = RegisterForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('setup')
-    else:
-        form = RegisterForm()
-    return render(request, 'registration/signup.html', {'form': form})
-
 @require_organization
 def home_view(request):
+    
+    organization_name = request.user.membership.organization.name
+        
     selected_year = request.GET.get('year', None)
     available_years = list(Bill.objects.dates('period', 'year', order='DESC'))
 
@@ -53,6 +38,7 @@ def home_view(request):
 
     context = {
         'bills': bills,
+        'organization_name': organization_name,
         'selected_year': selected_year,
         'available_years': available_years,
         'current_year': current_year,
@@ -81,7 +67,7 @@ def home_view(request):
         **price_chart,
         **year_comparison,
     }
-    return render(request, 'bill/index.html', context)
+    return render(request, 'bills/index.html', context)
 
 @require_organization
 def add_bills(request):
@@ -95,7 +81,7 @@ def add_bills(request):
             return redirect('home')
     else:
         form = BillForm()
-    return render(request, 'bill/add_bills.html', {'form': form})
+    return render(request, 'bills/add_bills.html', {'form': form})
 
 @require_organization
 def edit_bill(request, id):
@@ -110,7 +96,7 @@ def edit_bill(request, id):
     else:
         form = BillForm(instance=bill)
 
-    return render(request, 'bill/edit_bill.html', {'form': form, 'bill': bill})
+    return render(request, 'bills/edit_bill.html', {'form': form, 'bill': bill})
 
 @require_organization
 def bill_detail(request, id):
@@ -126,7 +112,7 @@ def bill_detail(request, id):
         'is_overdue': bool(bill.deadline and bill.deadline < today and not bill.paid),
         'consumption_diff': consumption_diff,
     }
-    return render(request, 'bill/bill_detail.html', context)
+    return render(request, 'bills/bill_detail.html', context)
 
 @require_organization
 def delete_bill(request, id):
@@ -162,7 +148,7 @@ def bills_list(request):
     paginator = Paginator(bills, 15)
     page_obj = paginator.get_page(request.GET.get('page', 1))
 
-    return render(request, 'bill/bills_list.html', {
+    return render(request, 'bills/bills_list.html', {
         'bills': page_obj,
         'page_obj': page_obj,
         'active_filter': type_filter,
