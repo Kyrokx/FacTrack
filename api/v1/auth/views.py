@@ -72,3 +72,16 @@ def logout_view(request):
             {'error': 'Token invalide.'},
             status=status.HTTP_400_BAD_REQUEST
         )
+        
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def about_me_view(request):
+    user = request.user
+    return Response({
+        'id': user.id,
+        'username': user.username,
+        'email': user.email,
+        'has_organization': hasattr(user, 'membership'),
+        'organization': user.membership.organization.name if hasattr(user, 'membership') else None,
+        'role': user.membership.role if hasattr(user, 'membership') else None,
+    })
