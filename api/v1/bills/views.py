@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
 from bills.models import Bill
 from .serializers import BillSerializer
+from drf_spectacular.utils import extend_schema
 
 
 @api_view(['GET'])
@@ -14,7 +15,6 @@ def bill_list_view(request):
     bills = Bill.objects.filter(organization=request.user.membership.organization)
     serializer = BillSerializer(bills, many=True)
     return Response(serializer.data)
-
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -30,7 +30,6 @@ def bill_create_view(request):
         serializer.save(organization=request.user.membership.organization)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
