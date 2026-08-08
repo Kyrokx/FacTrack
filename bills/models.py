@@ -18,7 +18,8 @@ class Bill(models.Model):
     organization = models.ForeignKey('organizations.Organization', null=True, blank=True, on_delete=models.SET_NULL, related_name='bills')
 
     def __str__(self):
-        return f"{self.type} - {self.organization.name} - {self.period.strftime('%m-%Y')}"
+        org_name = self.organization.name if self.organization else "Sans organisation"
+        return f"{self.type} - {org_name} - {self.period.strftime('%m-%Y')}"
 
     class Meta:
         ordering = ['-period']
