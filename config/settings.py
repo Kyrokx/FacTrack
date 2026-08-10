@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'drf_spectacular',
+    'django_cotton',
     'accounts',
     'bills',
     'organizations',
@@ -96,7 +97,18 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'loaders': [
+                'django_cotton.cotton_loader.Loader',
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+            ],
+            
+            "builtins": [
+                "django_cotton.templatetags.cotton"
+            ],
         },
+        
+        
     },
 ]
 
