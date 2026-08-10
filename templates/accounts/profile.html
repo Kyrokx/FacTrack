@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Mon Profil - FacTrack{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <div class="rounded-3xl bg-white p-6 shadow-soft ring-1 ring-slate-200 sm:p-8">
+        <h1 class="text-2xl font-bold text-primary">Mon Profil</h1>
+        <p class="mt-1 text-sm text-textSecondary">Vos informations personnelles.</p>
+    </div>
+
+    <div class="rounded-3xl bg-white p-6 shadow-soft ring-1 ring-slate-200 sm:p-8">
+        <h2 class="text-lg font-semibold text-primary mb-4">Informations</h2>
+        <div class="space-y-3">
+            <div>
+                <p class="text-sm text-textSecondary">Nom d'utilisateur</p>
+                <p class="text-xl font-bold text-primary">{{ user.username }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-textSecondary">Membre depuis</p>
+                <p class="font-semibold text-primary">{{ user.date_joined|date:"d/m/Y" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="rounded-3xl bg-white p-6 shadow-soft ring-1 ring-slate-200 sm:p-8">
+    <h2 class="text-lg font-semibold text-primary mb-4">Mon organisation</h2>
+
+    {% if membership %}
+    <div class="space-y-3">
+        <div>
+            <p class="text-sm text-textSecondary">Nom</p>
+            <p class="text-xl font-bold text-primary">{{ membership.organization.name }}</p>
+        </div>
+        <div>
+            <p class="text-sm text-textSecondary">Rôle</p>
+            <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold
+                {% if membership.role == 'owner' %}bg-accent/10 text-accent
+                {% elif membership.role == 'admin' %}bg-secondary/10 text-secondary
+                {% else %}bg-slate-100 text-textSecondary{% endif %}">
+                {{ membership.role }}
+            </span>
+        </div>
+        <div>
+            <p class="text-sm text-textSecondary">Rejoint le</p>
+            <p class="font-semibold text-primary">{{ membership.joined_at|date:"d/m/Y" }}</p>
+        </div>
+    </div>
+    {% else %}
+    <p class="text-sm text-textSecondary">Vous n'appartenez à aucune organisation.</p>
+    {% endif %}
+</div>  
+
+</div>
+{% endblock %}
