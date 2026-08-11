@@ -44,8 +44,34 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
+    'drf_spectacular',
+    'django_cotton',
+    'accounts',
     'bills',
+    'organizations',
+    'api'
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'FacTrack API',
+    'DESCRIPTION': 'API de suivi de factures SONABEL/ONEA',
+    'VERSION': '1.0.0',
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.IsAdminUser'],
+    'SERVE_AUTHENTICATION': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -63,7 +89,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'bills/templates', BASE_DIR / 'templates'],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -71,7 +97,18 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'loaders': [
+                'django_cotton.cotton_loader.Loader',
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+            ],
+            
+            "builtins": [
+                "django_cotton.templatetags.cotton"
+            ],
         },
+        
+        
     },
 ]
 
