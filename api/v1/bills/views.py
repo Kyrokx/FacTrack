@@ -11,6 +11,11 @@ from bills.services import get_bill_stats, get_sonabel_stats, get_onea_stats, ge
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def bill_list_view(request):
+    if not hasattr(request.user, 'membership'):
+        return Response(
+            {'error': 'Vous n\'appartenez à aucune organisation.'},
+            status=status.HTTP_404_NOT_FOUND
+        )
     bills = Bill.objects.filter(organization=request.user.membership.organization)
     serializer = BillSerializer(bills, many=True)
     return Response(serializer.data)

@@ -4,7 +4,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from organizations.models import Organization, Membership
+from organizations.models import Organization, Membership,generate_invite_code
 from .serializers import OrganizationSerializer,MembershipSerializer
 
 @api_view(['GET'])
@@ -205,3 +205,30 @@ def promote_member_view(request, membership_id):
         return Response({'error': 'Une erreur est survenue.'},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR
                         )
+        
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def regenerate_invite_code_view(request):
+    if not hasattr(request.user, 'membership'):
+        return Response(
+            {'error': 'Vous n\'appartenez à aucune organisation.'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    if request.user.membership.role != 'owner':
+        return Response(
+            {'error': 'Seul le propriétaire peut régénérer le code d\'invitation.'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    organization = request.user.membership.organization
+    
+    try:
+        organization.invite_code = generate_invite_code()
+        organization.save()
+        return Response({'invite_code': organization.invite_code}, status=status.HTTP_200_OK)
+    except Exception:
+        return Response(
+            {'error': 'Une erreur est survenue.'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

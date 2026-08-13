@@ -84,4 +84,6 @@ def about_me_view(request):
         'has_organization': hasattr(user, 'membership'),
         'organization': user.membership.organization.name if hasattr(user, 'membership') else None,
         'role': user.membership.role if hasattr(user, 'membership') else None,
+        'date_joined': user.date_joined,
+        'joined_at': user.membership.joined_at if hasattr(user, 'membership') else None,
     })

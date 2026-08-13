@@ -9,5 +9,6 @@ urlpatterns = [
     path('create/', views.create_organization_view, name='api_create_organization'),
     path('members/<int:membership_id>/remove/', views.remove_member_view, name='api_remove_member'),
     path('members/<int:membership_id>/promote/', views.promote_member_view, name='api_promote_member'),
+    path('regenerate-invite-code/', views.regenerate_invite_code_view, name='api_regenerate_invite_code'),
 
 ]
