@@ -7,7 +7,10 @@ from bills.models import Bill
 from .serializers import BillSerializer
 
 from bills.services import get_bill_stats, get_sonabel_stats, get_onea_stats, get_price_chart_data
-
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from django.http import HttpResponse
+from bills.utils import get_export_bills_queryset, generate_bills_pdf
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def bill_list_view(request):
@@ -130,3 +133,26 @@ def dashboard_view(request):
         'sonabel_price_chart': chart['sonabel_prices'],
         'onea_price_chart': chart['onea_prices'],
     })
+    
+    
+class BillsPDFExportView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        organization = request.user.membership.organization
+        bills = Bill.objects.filter(organization=organization)
+        
+        type_filter = request.GET.get('type')
+        year_filter = request.GET.get('year')
+
+        if type_filter in ['SONABEL', 'ONEA']:
+            bills = bills.filter(type=type_filter)
+        if year_filter:
+            bills = bills.filter(period__year=year_filter)
+
+        bills = bills.order_by('-period', '-id')
+        
+        pdf = generate_bills_pdf(list(bills))
+        response = HttpResponse(pdf, content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="factrack_factures.pdf"'
+        return response
