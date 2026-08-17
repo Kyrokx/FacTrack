@@ -98,12 +98,14 @@ def members_list_view(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def create_organization_view(request,name):
+def create_organization_view(request):
     if hasattr(request.user, 'membership'):
             return Response(
                 {'error': 'Vous appartenez déjà à une organisation.'},
                 status=status.HTTP_208_ALREADY_REPORTED
             )
+            
+    name = request.data.get('name')
             
     if not name:
         return Response(
