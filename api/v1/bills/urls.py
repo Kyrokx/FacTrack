@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import BillsPDFExportView
 
 urlpatterns = [
     path('', views.bill_list_view, name='api_bill_list'),
@@ -8,4 +9,6 @@ urlpatterns = [
     path('<int:id>/update/', views.bill_update_view, name='api_bill_update'),
     path('<int:id>/delete/', views.bill_delete_view, name='api_bill_delete'),
     path('<int:id>/toggle/', views.bill_toggle_view, name='api_bill_toggle'),
+    path('dashboard/', views.dashboard_view, name='api_dashboard'),
+    path('export/pdf/', BillsPDFExportView.as_view(), name='bills-export-pdf'),
 ]
